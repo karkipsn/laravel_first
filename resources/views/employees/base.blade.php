@@ -1,4 +1,4 @@
-@extends('layouts.app-template')
+@extends(departments.layout')
 @section('content')
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->

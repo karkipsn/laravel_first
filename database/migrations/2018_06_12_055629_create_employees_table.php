@@ -14,13 +14,13 @@ class CreateEmployeesTable extends Migration
     public function up()
     {
         Schema::create('employees', function (Blueprint $table) {
-            $table->increments('id');
+            $table->increments('id')->unique();
             $table->string('name');
             $table->string('add');
-            $table->string('depart');
-            $table->date('dob');
+            $table->date('date_hired');
+            $table->date('birthdate');
             $table->integer('department_id')->unsigned();
-            $table->foreign('department_id')->references('id')->on('department');
+            $table->foreign('department_id')->references('id')->on('departments');
             $table->timestamps();
         });
     }

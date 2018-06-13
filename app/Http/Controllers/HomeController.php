@@ -43,6 +43,14 @@ class HomeController extends Controller
 
      public function store(Request $request)
      {
+
+        $this->validate($request, [
+        'fname' => 'required|max:255',
+        'lname' => 'required|max:255',
+        'email' => 'required|unique|max:255',
+        'password' => 'required',
+        
+    ]);
      	$user= new \App\User;       
      	$user->fname=$request->get('fname');
      	$user->lname=$request->get('lname');
@@ -64,7 +72,12 @@ class HomeController extends Controller
 
      public function update(Request $request, $id){
 
-     	$user= \App\User::find($id);       
+     	
+        $this->validate($request, [
+        'password' => 'required',
+    ]);
+
+        $user= \App\User::find($id);       
      	$user->password=$request->get('password');
      	$user->save();
      	return redirect('users');

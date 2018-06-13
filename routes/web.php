@@ -22,9 +22,17 @@ Route::resource('users','HomeController');
 
 Route::resource('departments','DepartmentController');
 
-Route::post('department/search', 'DepartmentController@search')->name('department.search');
+// Route::post('department/search', 'DepartmentController@search')->name('department.search');
 
-Route::resource('employee','EmployeeController');
+Route::resource('employees','EmployeeController');
+
+Route::resource('tasks', 'TaskController');
 
 Auth::routes();
 // Auth::logout();
+
+if (version_compare(PHP_VERSION, '7.2.0', '>=')) {
+// Ignores notices and reports all other kinds... and warnings
+error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
+// error_reporting(E_ALL ^ E_WARNING); // Maybe this is enough
+}

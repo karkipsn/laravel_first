@@ -1,19 +1,21 @@
 <?php
 
+
 namespace App\Http\Controllers;
 
 use App\Task;
 use App\Employee;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
-class EmployeeTaskController extends Controller
+class TaskController extends Controller
 {
 
-     public function __construct()
-    {
-        $this->middleware('auth');
-    }
+   public function __construct()
+   {
+    $this->middleware('auth');
+}
     /**
      * Display a listing of the resource.
      *
@@ -25,12 +27,6 @@ class EmployeeTaskController extends Controller
         ->leftJoin('employees', 'tasks.employee_id', '=', 'employees.id')
         ->select ('tasks.*','employees.name as employee_name','employees.id as employee_id')
         ->paginate(5);
-
-          // $employees = DB::table('employees')
-       //  ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
-       //  ->select('employees.*', 'departments.name as department_name', 'departments.id as department_id')
-       //  ->paginate(5);
-
 
         return view('tasks/index', ['tasks' => $tasks]);
     }
@@ -44,7 +40,7 @@ class EmployeeTaskController extends Controller
     {
         $employees = Employee::all();
 
-           return view('tasks/create', [
+        return view('tasks/create', [
             'employees' => $employees]);
     }
     
@@ -57,16 +53,21 @@ class EmployeeTaskController extends Controller
      */
     public function store(Request $request)
     {
-     
-         $this->validateInput($request);
-        $keys = ['title','description','attachment','deadline','employee_id'];
 
-        $input = $this->createQueryInput($keys,$reuest);
-         
-        Task::create($input);
+       $this->validateInput($request);
 
-        return redirect()->intended('/tasks');
-    }
+       $path = $request->file('attachment')->store('avatars');
+
+       $keys = ['title','description','deadline','employee_id',];
+
+       $input = $this->createQueryInput($keys,$request);
+       $input['attachment'] = $path;
+
+       Task::create($input);
+
+       return redirect()->intended('/tasks');
+   }
+
 
     /**
      * Display the specified resource.
@@ -75,8 +76,7 @@ class EmployeeTaskController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    {
-        //
+    {//
     }
 
     /**
@@ -87,8 +87,18 @@ class EmployeeTaskController extends Controller
      */
     public function edit($id)
     {
-        //
+
+       $task = Employee::find($id);
+        // Redirect to state list if updating state wasn't existed
+       if ($task == null || count($task) == 0) {
+        return redirect()->intended('/tasks');
     }
+
+    $employees = Employee::all();
+
+    return view('tasks/edit', ['task' => $task, 
+        'employees' => $employees]);
+}
 
     /**
      * Update the specified resource in storage.
@@ -99,7 +109,21 @@ class EmployeeTaskController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $task = Task::findOrFail($id);
+        $this->validateInput($request);
+        // Upload image
+        $keys = ['title','description','deadline','employee_id',];
+        $input = $this->createQueryInput($keys, $request);
+        if ($request->file('attachment')) {
+            $path = $request->file('attachment')->store('avatars');
+            $input['attachment'] = $path;
+        }
+
+
+        Task::where('id', $id)
+        ->update($input);
+
+        return redirect()->intended('/tasks');
     }
 
     /**
@@ -110,26 +134,28 @@ class EmployeeTaskController extends Controller
      */
     public function destroy($id)
     {
-        //
-    }
+       Task::where('id', $id)->delete();
+       return redirect()->intended('/tasks');
+   }
 
-    private function validateInput($request) {
-        $this->validate($request, [
-            'title' => 'required|max:60',
-            'description' => 'required|max:120',
-            'attachment' => 'required',
-            'deadline' => 'required',
-            'employee_id' => 'required'
+   private function validateInput($request) {
+    $this->validate($request, [
+        'title' => 'required|max:60',
+        'description' => 'required|max:120',
+        'deadline' => 'required',
+        'attachment' => 'required|file|image|mimes:jpeg,png,gif,webp|max:2048',
+        'employee_id' => 'required'
 
-        ]);
-    }
-private function createQueryInput($keys, $request) {
-        $queryInput = [];
-        for($i = 0; $i < sizeof($keys); $i++) {
-            $key = $keys[$i];
-            $queryInput[$key] = $request[$key];
-        }
-
-        return $queryInput;
-    }
+    ]);
 }
+private function createQueryInput($keys, $request) {
+    $queryInput = [];
+    for($i = 0; $i < sizeof($keys); $i++) {
+        $key = $keys[$i];
+        $queryInput[$key] = $request[$key];
+    }
+
+    return $queryInput;
+}
+}
+

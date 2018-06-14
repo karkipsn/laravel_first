@@ -22,9 +22,12 @@ Route::resource('users','HomeController');
 
 Route::resource('departments','DepartmentController');
 
-// Route::post('department/search', 'DepartmentController@search')->name('department.search');
 
 Route::resource('employees','EmployeeController');
+
+//For importing the csv or xls or xlsx
+ Route::get('/add_import', 'EmployeeController@add_import')->name('employees.add_import');
+ Route::post('/employees/import', 'EmployeeController@import')->name('employees.import');
 
 Route::resource('tasks', 'TaskController');
 

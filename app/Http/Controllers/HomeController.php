@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\User;
+use Illuminate\Support\Facades\DB;
 
 use Illuminate\Http\Request;
 
@@ -27,8 +29,10 @@ class HomeController extends Controller
 
      public function index()
 	{
-		$users=\App\User::all();
-		return view('user_index',compact('users'));
+		$users=User::all();
+		return view('users/index',compact('users'));
+
+        
 	}
      /**
      * Show the form for creating a new resource.
@@ -37,53 +41,83 @@ class HomeController extends Controller
      */
      public function create()
      {
-         return view('user_create');//returns the create file from the view
+         return view('users/create');//returns the create file from the view
      }
 
 
      public function store(Request $request)
      {
 
-        $this->validate($request, [
-        'fname' => 'required|max:255',
-        'lname' => 'required|max:255',
-        'email' => 'required|unique|max:255',
-        'password' => 'required',
-        
-    ]);
-     	$user= new \App\User;       
-     	$user->fname=$request->get('fname');
-     	$user->lname=$request->get('lname');
-     	$user->email=$request->get('email');
-     	$user->password=$request->get('password');
-     	$user->save();
+        $this->validateInput($request);
 
-     	return redirect('users')->with('success', 'User has been added');
+         User::create([
+            'fname' => $request['fname'],
+            'lname' => $request['lname'],
+            'email' => $request['email'],
+            'password' => bcrypt($request['password'])
+            
+        ]);
+
+        return redirect()->intended('users')->with('success', 'User has been added');
+
+     	
      }
 
 
      public function edit($id){
 
-     	$user = \App\User::find($id);
+     	$user = User::find($id);
+        // Redirect to state list if updating state wasn't existed
+        if ($user == null || count($user) == 0) {
+            return redirect()->intended('/users');
+        }
      	//return view('user_edit',compact('user','id'));
-     	return view('user_edit');
+     	return view('users/edit',['user'=>$user]);
+       
      }
 
 
      public function update(Request $request, $id){
 
-     	
-        $this->validate($request, [
-        'password' => 'required',
-    ]);
 
-        $user= \App\User::find($id);       
-     	$user->password=$request->get('password');
-     	$user->save();
-     	return redirect('users');
+        $user= User::findOrFail($id);
+        $this->validateInput($request);
+
+        $keys = ['password'];
+        $input = $this->createQueryInput($keys, $request);
+       
+        User::where('id', $id)
+            ->update($input);
+
+        return redirect()->intended('/users');
+
 
      }
+     public function destroy($id){
+        User::where('id', $id)->delete();
+         return redirect()->intended('users');
+
+     }
+
      public function show(){
 
      }
+      private function validateInput($request) {
+        $this->validate($request, [
+            'fname' => 'required|max:60',
+            'lname' => 'required|max:120',
+            'email' => 'required|email|max:255|unique:users',
+        'password' => 'required|min:6|confirmed',
+
+        ]);
+    }
+private function createQueryInput($keys, $request) {
+        $queryInput = [];
+        for($i = 0; $i < sizeof($keys); $i++) {
+            $key = $keys[$i];
+            $queryInput[$key] = $request[$key];
+        }
+
+        return $queryInput;
+    }
 }

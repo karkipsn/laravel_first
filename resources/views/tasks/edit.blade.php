@@ -5,10 +5,12 @@
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
             <div class="panel panel-default">
-                <div class="panel-heading">Add tasks for employee</div>
+                <div class="panel-heading">Update EmployeeTask</div>
                 <div class="panel-body">
+                    <form class="form-horizontal" role="form" method="POST" action="{{ route('tasks.update', ['id' => $task->id]) }}">
+                        <input type="hidden" name="_method" value="PATCH">
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
-                    <form class="form-horizontal" role="form" method="POST" action="{{ route('tasks.store') }}"enctype="multipart/form-data">{{ csrf_field() }}
 
                         <div class="form-group{{ $errors->has('employee_id') ? ' has-error' : '' }}">
                             <label class="col-md-4 control-label">Employee</label>
@@ -55,14 +57,6 @@
                             </div>
                         </div>
 
-
-                         <div class="form-group">
-                            <label for="avatar" class="col-md-4 control-label" >Attachment</label>
-                            <div class="col-md-6">
-                                <input type="file" id="attachment" name="attachment" required >
-                            </div>
-                        </div>
-
                         <!-- <div class="form-group{{ $errors->has('attachment') ? ' has-error' : '' }}">
                             <label for="attachment" class="col-md-4 control-label">Attachment</label>
 
@@ -76,6 +70,13 @@
                                 @endif
                             </div>
                         </div> -->
+                        <div class="form-group">
+                            <label for="avatar" class="col-md-4 control-label" >Attachment</label>
+                            <div class="col-md-6">
+                                <img src="../../{{$employee->attachment }}" width="50px" height="50px"/>
+                                <input type="file" id="attachment" name="attachment" />
+                            </div>
+                        </div>
 
                         <div class="form-group">
                             <label class="col-md-4 control-label">DeadLine Date</label>
@@ -89,14 +90,14 @@
                             </div>
                         </div>
 
+
                         <div class="form-group">
                             <div class="col-md-6 col-md-offset-4">
-                                <button type="submit" class="btn btn-success">
-                                    Create
+                                <button type="submit" class="btn btn-primary">
+                                    Update
                                 </button>
                             </div>
                         </div>
-                    
                     </form>
                 </div>
             </div>

@@ -8,7 +8,8 @@
 <body>
   <div class="container">
     <h2>Edit A User</h2><br  />
-    <form method="post" action="{{action('HomeController@update', $id)}}">
+    <form method="post" action="{{ route('users.update', ['id' => $user->id]) }}">
+
       @csrf
       <input name="_method" type="hidden" value="PATCH">
       

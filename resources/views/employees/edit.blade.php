@@ -7,7 +7,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Update employee</div>
                 <div class="panel-body">
-                    <form class="form-horizontal" role="form" method="POST" action="{{ route('employees.update', ['id' => $employee->id]) }}" enctype="multipart/form-data">
+                    <form class="form-horizontal" role="form" method="POST" action="{{ route('employees.update', ['id' => $employee->id]) }}">
                         <input type="hidden" name="_method" value="PATCH">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
@@ -18,23 +18,23 @@
                                 <input id="name" type="text" class="form-control" name="name" value="{{ old('name') }}" required autofocus>
 
                                 @if ($errors->has('name'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('name') }}</strong>
-                                    </span>
+                                <span class="help-block">
+                                    <strong>{{ $errors->first('name') }}</strong>
+                                </span>
                                 @endif
                             </div>
                         </div>
                         
-                       <div class="form-group{{ $errors->has('add') ? ' has-error' : '' }}">
+                        <div class="form-group{{ $errors->has('add') ? ' has-error' : '' }}">
                             <label for="add" class="col-md-4 control-label">Address</label>
 
                             <div class="col-md-6">
                                 <input id="add" type="text" class="form-control" name="add" value="{{ old('add') }}" required>
 
                                 @if ($errors->has('add'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('add') }}</strong>
-                                    </span>
+                                <span class="help-block">
+                                    <strong>{{ $errors->first('add') }}</strong>
+                                </span>
                                 @endif
                             </div>
                         </div>
@@ -68,13 +68,13 @@
                             <div class="col-md-6">
                                 <select class="form-control" name="department_id">
                                     @foreach ($departments as $department)
-                                        <option value="{{$department->id}}">{{$department->name}}</option>
+                                    <option value="{{$department->id}}">{{$department->name}}</option>
                                     @endforeach
                                 </select>
-                                 @if ($errors->has('department_id'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('department_id') }}</strong>
-                                    </span>
+                                @if ($errors->has('department_id'))
+                                <span class="help-block">
+                                    <strong>{{ $errors->first('department_id') }}</strong>
+                                </span>
                                 @endif
                             </div>
                         </div>

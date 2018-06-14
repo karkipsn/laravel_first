@@ -11,6 +11,10 @@
         <div class="col-sm-4">
           <a class="btn btn-primary" href="{{ route('employees.create') }}">Add new employee</a>
         </div>
+
+        <div class="col-sm-4">
+          <a class="btn btn-primary" href="{{ route('employees.add_import') }}">Import Employee</a>
+        </div>
     </div>
   </div>
   <!-- /.box-header -->

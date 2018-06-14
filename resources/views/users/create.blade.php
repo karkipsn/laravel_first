@@ -15,7 +15,7 @@
 <body>
 	 <div class="container">
 	 	 <h2>User Management System</h2><br/>
-	<form method="post"  action="{{url('users')}}">   
+	<form method="post"  action="{{ route('users.store') }}">   
     @csrf
 		
 			 <div class="row">
@@ -66,8 +66,7 @@
           <div class="form-group col-md-4" style="margin-top:60px">
             <button type="submit" class="btn btn-success">Register</button>
           </div>
-        </div>
-	    
+        </div>    
 	    
 	</form>
 </body>

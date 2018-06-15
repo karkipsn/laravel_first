@@ -16,9 +16,11 @@ Route::get('/', function () {
 });
 
 //Route::get('/home', 'HomeController@index')->name('home');
-Route::get('/home', 'HomeController@index')->name('home');
 
-Route::resource('users','HomeController');
+ Route::resource('users','HomeController');
+Route::get('/users/add/add/add', 'HomeController@add');
+ Route::get('/users/getdata/getdata/getdata', 'HomeController@getdata');
+
 
 Route::resource('departments','DepartmentController');
 

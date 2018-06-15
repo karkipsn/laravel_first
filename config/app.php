@@ -161,7 +161,8 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
          Maatwebsite\Excel\ExcelServiceProvider::class,
-         Yajra\DataTables\DataTablesServiceProvider::class,
+         yajra\DataTables\DataTablesServiceProvider::class,
+         yajra\DataTables\ButtonsServiceProvider::class
 
     ],
 
@@ -212,7 +213,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
-        'DataTables' => Yajra\DataTables\Facades\DataTables::class
+        'DataTables' => yajra\DataTables\Facades\DataTables::class
 
     ],
 

@@ -24,12 +24,16 @@
 
 </head>
 <body>
-
+  <div class="row">
+    <div class="col-sm-6" >
+      <a class="btn btn-primary" href="{{ route('users.create') }}">Add new users</a>
+    </div>
+  </div>
 
   <div class="container ">
 
-    <div class="col-sm-4">
-      <a class="btn btn-primary" href="{{ route('users.create') }}">Add new users</a>
+    <div class="col-sm-12">
+
 
       <br />
       @if (\Session::has('success'))
@@ -65,42 +69,65 @@
             <td>{{$user->password}}</td>
             <td>{{$user->created_at}}</td>
             <td>{{$user->updated_at}}</td>
-      
 
-        <td>
-         <form class="row" method="POST" action="{{ route('users.destroy', ['id' => $user->id]) }}" onsubmit = "return confirm('Are you sure?')">
-          <input type="hidden" name="_method" value="DELETE">
-          <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            <td>
+             <form class="row" method="POST" action="{{ route('users.destroy', ['id' => $user->id]) }}" onsubmit = "return confirm('Are you sure?')">
+              <input type="hidden" name="_method" value="DELETE">
+              <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
-          <a href="{{ route('users.edit', ['id' => $user->id]) }}" class="btn btn-warning col-sm-3 col-xs-5 btn-margin">   Update </a>
+              <a href="{{ route('users.edit', ['id' => $user->id]) }}" class="btn btn-warning col-sm-3 col-xs-5 btn-margin">   Update </a>
 
-          <button type="submit" class="btn btn-danger col-sm-3 col-xs-5 btn-margin"> Delete </button>
+              <button type="submit" class="btn btn-danger col-sm-3 col-xs-5 btn-margin"> Delete </button>
 
-        </form>
-      </td>
+            </form>
+          </td>
 
-    </tr>
-    @endforeach
-  </tbody>
-</table>
-</div>
-</div>
-
-<div class="row">
-  <div class="col-sm-6" >
-    <div class="dataTables_info" id="example2_info" role="status" aria-live="polite">Showing 1 to {{count($users)}} of {{count($users)}} entries</div></div>
-
-    <div class="col-sm-6">
-        <div class="dataTables_paginate paging_simple_numbers" id="example2_paginate">
-          {{ $users->links() }}
-        </div>
-      </div>
+        </tr>
+        @endforeach
+      </tbody>
+    </table>
   </div>
-  
+</div>
+
+
+
+
   <!-- <script src="//code.jquery.com/jquery-1.10.2.js"></script>
     <script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script> -->
-   
+    <script>
+      $(document).ready(function() {
+        $('#toop').DataTable({
+          
+          processing: true,
+          serverSide: false,
+          responsive: true,
+          autoWidth:false,
+         dom: 'Bfrtip',
+          buttons: [
+          'copy', 'csv', 'excel', 'pdf', 'print'
+          ],
+          ajax: '{{ url('users/getdata/getdata/getdata') }}',
+          columns: [
+          { data: 'id', name: 'id' },
+          { data: 'fname', name: 'fname' },
+          { data: 'lname', name: 'name' },
+          { data: 'email', name: 'email' },
+          { data: 'password', name: 'password' },
+          { data: 'created_at', name: 'created_at' },
+          { data: 'updated_at', name: 'updated_at' },
+          {data: 'action', name: 'action', orderable: false, searchable: false}
+          ]
+        });
 
-</body>
-</html>
+      });
 
+    </script>
+
+  </body>
+  </html>
+
+
+
+         <!-- 
+
+ -->

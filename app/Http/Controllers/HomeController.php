@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 use App\User;
 use Illuminate\Support\Facades\DB;
-
+use DataTables;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -14,7 +14,7 @@ class HomeController extends Controller
 //      */
     public function __construct()
     {
-        $this->middleware('auth');
+        // $this->middleware('auth');
     }
 
     /**
@@ -22,18 +22,44 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    // public function index()
-    // {
-    //     return view('home');
-    // }
 
-     public function index()
+    
+
+public function add()
+     {
+         return view('users/add');//returns the create file from the view
+     }
+
+     public function getdata()
 	{
-		$users=User::all();
-		return view('users/index',compact('users'));
+     // return Datatables::of(User::query())->make(true);
+		// $users=User::latest()->paginate(5);
+
+		// return view('users/index',compact('users'))
+  //        ->with('i', (request()->input('page', 1) - 1) * 5);
+
+         $users= User::all();
+          return \DataTables::of($users)
+          ->addColumn('action', function ($user) {
+                return '<a href="/users/'.$user->id.'/edit" class="btn btn-xs btn-primary"><i class="glyphicon glyphicon-edit"></i> Edit</a>';
+            })
+            ->editColumn('id', 'ID: {{$id}}')
+            ->removeColumn('password')
+            ->make(true);
+          
+
+	}
+     public function index()
+    {
+    
+        $users=User::latest()->paginate(5);
+
+        return view('users/index',compact('users'))
+        ->with('i', (request()->input('page', 1) - 1) * 5);
 
         
-	}
+
+    }
      /**
      * Show the form for creating a new resource.
      *
@@ -95,7 +121,7 @@ class HomeController extends Controller
      }
      public function destroy($id){
         User::where('id', $id)->delete();
-         return redirect()->intended('users');
+         return redirect()->intended('/users');
 
      }
 

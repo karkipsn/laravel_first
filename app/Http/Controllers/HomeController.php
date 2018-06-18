@@ -17,12 +17,6 @@ class HomeController extends Controller
         // $this->middleware('auth');
     }
 
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Http\Response
-     */
-
     
 
 public function add()
@@ -32,11 +26,6 @@ public function add()
 
      public function getdata()
 	{
-     // return Datatables::of(User::query())->make(true);
-		// $users=User::latest()->paginate(5);
-
-		// return view('users/index',compact('users'))
-  //        ->with('i', (request()->input('page', 1) - 1) * 5);
 
          $users= User::all();
           return \DataTables::of($users)
@@ -84,7 +73,8 @@ public function add()
             
         ]);
 
-        return redirect()->intended('users')->with('success', 'User has been added');
+        return redirect()->intended('users')
+        ->with('success', 'User has been added');
 
      	
      }
@@ -115,13 +105,15 @@ public function add()
         User::where('id', $id)
             ->update($input);
 
-        return redirect()->intended('/users');
+        return redirect()->intended('/users')
+        ->with('success', 'User have been updated Successfully');
 
 
      }
      public function destroy($id){
         User::where('id', $id)->delete();
-         return redirect()->intended('/users');
+         return redirect()->intended('/users')
+         ->with('success','User has been deleted Successfully');
 
      }
 

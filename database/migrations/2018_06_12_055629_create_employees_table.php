@@ -22,6 +22,7 @@ class CreateEmployeesTable extends Migration
             $table->integer('department_id')->unsigned();
             $table->foreign('department_id')->references('id')->on('departments');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

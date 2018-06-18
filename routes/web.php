@@ -15,9 +15,12 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-//Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/home', 'HomeController@index')->name('home');
+
+Route::get('logout', '\App\Http\Controllers\Auth\LoginController@logout');
 
  Route::resource('users','HomeController');
+ 
 Route::get('/users/add/add/add', 'HomeController@add');
  Route::get('/users/getdata/getdata/getdata', 'HomeController@getdata');
 

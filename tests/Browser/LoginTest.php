@@ -13,13 +13,13 @@ class LoginTest extends DuskTestCase
      *
      * @return void
      */
-     public function test_I_can_login_successfully()
+     public function test_login()
     {
         $this->browse(function ($browser) {
-            $browser->visit('/login')
-                    ->type('email', 'psn.karki20@gmail.com')
-                    ->type('password', 'psnpsn')
+            $browser->visit('login')
+                    ->type('email', 'whXjFUpgIc@gmail.com')
+                    ->type('password', 'secret')
                     ->press('Login')
-                    ->assertSee('You are logged in!');
+                     ->assertPathIs('/users');
         });
     }}

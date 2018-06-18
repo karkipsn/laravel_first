@@ -65,7 +65,8 @@ class TaskController extends Controller
 
        Task::create($input);
 
-       return redirect()->intended('/tasks');
+       return redirect()->intended('/tasks')
+       ->with('success','Task deleted successfully');;
    }
 
 
@@ -123,7 +124,8 @@ class TaskController extends Controller
         Task::where('id', $id)
         ->update($input);
 
-        return redirect()->intended('/tasks');
+        return redirect()->intended('/tasks')
+        ->with('success','Task updated successfully');;
     }
 
     /**
@@ -135,10 +137,12 @@ class TaskController extends Controller
     public function destroy($id)
     {
        Task::where('id', $id)->delete();
-       return redirect()->intended('/tasks');
+       return redirect()->intended('/tasks')
+       ->with('success','Task deleted successfully');;
    }
 
    private function validateInput($request) {
+    
     $this->validate($request, [
         'title' => 'required|max:60',
         'description' => 'required|max:120',

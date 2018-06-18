@@ -3,13 +3,21 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Department extends Model
 {
-    protected $table = 'departments';
+ use SoftDeletes;
 
-    
+    protected $table = 'departments';
+    protected $dates = ['deleted_at'];
+   
     protected $fillable = [
         'name',
     ];
+
+
+    public function employees(){
+    	return $this->hasMany(Employee::class);
+    }
 }

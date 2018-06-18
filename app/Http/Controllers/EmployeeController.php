@@ -12,8 +12,8 @@ use Illuminate\Support\Facades\DB;
 
 class EmployeeController extends Controller
 {
-   public function __construct()
-   {
+ public function __construct()
+ {
     $this->middleware('auth');
 }
 
@@ -35,13 +35,14 @@ public function index()
      */
     public function create()
     {
-     $departments = Department::all();
+       $departments = Department::all();
 
-     return view('employees/create', [
+       return view('employees/create', [
         'departments' => $departments]);
- }
+   }
 
- public function add_import(){
+
+   public function add_import(){
 
     return view ('employees/add_import');
 
@@ -63,7 +64,8 @@ public function index()
 
         Employee::create($input);
 
-        return redirect()->intended('/employees');
+        return redirect()->intended('/employees')
+         ->with('success','Employee created successfully');;
     }
 
     /**
@@ -121,9 +123,9 @@ public function index()
      */
     public function edit($id)
     {
-     $employee = Employee::find($id);
+       $employee = Employee::find($id);
         // Redirect to state list if updating state wasn't existed
-     if ($employee == null || count($employee) == 0) {
+       if ($employee == null || count($employee) == 0) {
         return redirect()->intended('/employees');
     }
 
@@ -152,7 +154,8 @@ public function index()
         Employee::where('id', $id)
         ->update($input);
 
-        return redirect()->intended('/employees');
+        return redirect()->intended('/employees')
+         ->with('success','Employee updated successfully');;
     }
 
     /**
@@ -163,17 +166,12 @@ public function index()
      */
     public function destroy($id)
     {
-     Employee::where('id', $id)->delete();
-     return redirect()->intended('/employees');
- }
+       Employee::where('id', $id)->delete();
+       return redirect()->intended('/employees')
+       ->with('success','EMployee deleted successfully');;
+   }
 
-
-
-
- 
-
-
- private function validateInput($request) {
+   private function validateInput($request) {
     $this->validate($request, [
         'name' => 'required|max:60',
         'add' => 'required|max:120',
@@ -182,6 +180,7 @@ public function index()
         'department_id' => 'required'
     ]);
 }
+
 
 private function createQueryInput($keys, $request) {
     $queryInput = [];

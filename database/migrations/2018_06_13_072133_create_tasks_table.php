@@ -22,6 +22,7 @@ class CreateTasksTable extends Migration
             $table->string('attachment',60);
             $table->date('deadline');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

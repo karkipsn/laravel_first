@@ -9,12 +9,17 @@
           <h3 class="box-title">List of employees</h3>
         </div>
         <div class="col-sm-4">
-          <a class="btn btn-primary" href="{{ route('tasks.create') }}">Add new employee</a>
+          <a class="btn btn-primary" href="{{ route('tasks.create') }}">Add Employee Task</a>
         </div>
       </div>
     </div>
     <!-- /.box-header -->
     <div class="box-body">
+      @if ($message = Session::get('success'))
+        <div class="alert alert-success">
+            <p>{{ $message }}</p>
+        </div>
+    @endif
       <div class="row">
         <div class="col-sm-6"></div>
         <div class="col-sm-6"></div>

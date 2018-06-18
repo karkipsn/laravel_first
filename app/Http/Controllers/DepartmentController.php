@@ -18,34 +18,49 @@ class DepartmentController extends Controller
         $this->middleware('auth');
     }
 
-   
-     public function index()
+    
+
+    
+    public function index()
     {
         $departments = Department::latest()->paginate(5);
 
-        return view('departments.index',compact('departments'))
-            ->with('i', (request()->input('page', 1) - 1) * 5);
+        return view('departments/index',compact('departments'))
+        ->with('i', (request()->input('page', 1) - 1) * 5);
     }
 
 
     public function create()
     {
-        return view('departments.create');
+        return view('departments/create');
     }
 
 
-     public function store(Request $request)
+    public function store(Request $request)
     {
-        request()->validate([
-            'name' => 'required',
-
-        ]);
-
-        Department::create($request->all());
-
-        return redirect()->route('departments.index')
-                        ->with('success','Department created successfully.');
+       $validator= $this->validateInput($request);
+       if ($validator->fails())
+       {
+        return Redirect::to('departments/index')->withInput()->withErrors($validator);
     }
+
+    Department::create([
+        'name' => $request['name']
+    ]);
+
+    return redirect()->route('departments/index')
+    ->with('success','Department created successfully.');
+    
+
+        // Department::create($request->all());
+}
+
+
+private function validateInput($request) {
+    $this->validate($request, [
+        'name' => 'required|max:60|unique:departments'
+    ]);
+}
 
     /**
      * Display the specified resource.
@@ -53,7 +68,7 @@ class DepartmentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-     public function show(Department $department)
+    public function show(Department $department)
     {
         return view('departments.show',compact('department'));
     }
@@ -63,9 +78,15 @@ class DepartmentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Department $department)
+    public function edit($id)
     {
-         return view('departments.edit',compact('department'));
+
+        $department = Department::find($id);
+        // Redirect to department list if updating department wasn't existed
+        if ($department == null || count($department) == 0) {
+            return redirect()->intended('/departments');
+        }
+        return view('departments/edit',compact('department'));
     }
 
     /**
@@ -75,18 +96,19 @@ class DepartmentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, DepartmentD $department)
+    public function update(Request $request, $id)
     {
-         request()->validate([
-            'name' => 'required',
-           
-        ]);
 
-        $department->update($request->all());
+        $department = Department::findOrFail($id);
 
+        $this->validateInput($request);
 
-        return redirect()->route('departments.index')
-                        ->with('success','DepartmentD updated successfully');
+        $input = ['name' => $request['name']];
+
+        Department::where('id', $id)->update($input);
+
+        return redirect()->route('/departments')
+        ->with('success','Department updated successfully');
     }
 
     /**
@@ -95,14 +117,14 @@ class DepartmentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-   public function destroy(Department $department)
+    public function destroy($id)
     {
-        $department->delete();
+       Department::where('id', $id)->delete();
+        //$department->delete();
 
-
-        return redirect()->route('departments.index')
-                        ->with('success','Department deleted successfully');
-    }
+       return redirect()->route('/departments')
+       ->with('success','Department deleted successfully');
+   }
 
     /**
      * Search department from database base on some specific constraints
@@ -132,9 +154,5 @@ class DepartmentController extends Controller
     //     }
     //     return $query->paginate(5);
     // }
-    // private function validateInput($request) {
-    //     $this->validate($request, [
-    //     'name' => 'required|max:60|unique:department'
-    // ]);
-    // }
+    
 }

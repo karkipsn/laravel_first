@@ -7,6 +7,12 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Update EmployeeTask</div>
                 <div class="panel-body">
+
+                    @if ($message = Session::get('error'))
+                    <div class="alert alert-success">
+                        <p>{{ $message }}</p>
+                    </div>
+                    @endif
                     <form class="form-horizontal" role="form" method="POST" action="{{ route('tasks.update', ['id' => $task->id]) }}">
                         <input type="hidden" name="_method" value="PATCH">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">

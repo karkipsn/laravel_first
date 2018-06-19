@@ -15,7 +15,7 @@ class DepartmentController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        // $this->middleware('auth');
     }
 
     
@@ -38,17 +38,17 @@ class DepartmentController extends Controller
 
     public function store(Request $request)
     {
-       $validator= $this->validateInput($request);
-       if ($validator->fails())
-       {
-        return Redirect::to('departments/index')->withInput()->withErrors($validator);
+      $valid= $this->validateInput($request);
+      if(!$valid){
+        return back()
+        ->with('error', 'Invalid input');
     }
 
     Department::create([
         'name' => $request['name']
     ]);
 
-    return redirect()->route('departments/index')
+    return redirect()->route('/departments')
     ->with('success','Department created successfully.');
     
 
@@ -58,7 +58,7 @@ class DepartmentController extends Controller
 
 private function validateInput($request) {
     $this->validate($request, [
-        'name' => 'required|max:60|unique:departments'
+        'name' => 'required|string|max:60|unique:departments'
     ]);
 }
 
@@ -101,7 +101,12 @@ private function validateInput($request) {
 
         $department = Department::findOrFail($id);
 
-        $this->validateInput($request);
+        $valid=$this->validateInput($request);
+
+        if(!$valid){
+            return back()
+            ->with('error', 'Invalid input');
+        }
 
         $input = ['name' => $request['name']];
 
@@ -119,12 +124,12 @@ private function validateInput($request) {
      */
     public function destroy($id)
     {
-       Department::where('id', $id)->delete();
+     Department::where('id', $id)->delete();
         //$department->delete();
 
-       return redirect()->route('/departments')
-       ->with('success','Department deleted successfully');
-   }
+     return redirect()->route('/departments')
+     ->with('success','Department deleted successfully');
+ }
 
     /**
      * Search department from database base on some specific constraints

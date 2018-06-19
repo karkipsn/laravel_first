@@ -52,7 +52,7 @@ class RegisterController extends Controller
             'fname' => 'required|string|max:255',
             'lname' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
+            'password' => 'required|min:6|confirmed',
         ]);
     }
 
@@ -69,6 +69,6 @@ class RegisterController extends Controller
             'lname' => $data['lname'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-        ]);
+        ])->with('success', 'You are logged in!');
     }
 }

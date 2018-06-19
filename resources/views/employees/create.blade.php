@@ -7,6 +7,13 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Add new employee</div>
                 <div class="panel-body">
+
+                    @if ($message = Session::get('error'))
+                    <div class="alert alert-success">
+                        <p>{{ $message }}</p>
+                    </div>
+                    @endif
+
                     <form class="form-horizontal" role="form" method="POST" action="{{ route('employees.store') }}">
                         {{ csrf_field() }}
                         
@@ -17,9 +24,9 @@
                                 <input id="name" type="text" class="form-control" name="name" value="{{ old('name') }}" required autofocus>
 
                                 @if ($errors->has('name'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('name') }}</strong>
-                                    </span>
+                                <span class="help-block">
+                                    <strong>{{ $errors->first('name') }}</strong>
+                                </span>
                                 @endif
                             </div>
                         </div>
@@ -31,9 +38,9 @@
                                 <input id="add" type="text" class="form-control" name="add" value="{{ old('add') }}" required>
 
                                 @if ($errors->has('add'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('add') }}</strong>
-                                    </span>
+                                <span class="help-block">
+                                    <strong>{{ $errors->first('add') }}</strong>
+                                </span>
                                 @endif
                             </div>
                         </div>
@@ -51,7 +58,7 @@
                         </div>
 
                         
-                          <div class="form-group">
+                        <div class="form-group">
                             <label class="col-md-4 control-label">Hired Date</label>
                             <div class="col-md-6">
                                 <div class="input-group date">
@@ -70,13 +77,13 @@
                             <div class="col-md-6">
                                 <select class="form-control" name="department_id">
                                     @foreach ($departments as $department)
-                                        <option value="{{$department->id}}">{{$department->name}}</option>
+                                    <option value="{{$department->id}}">{{$department->name}}</option>
                                     @endforeach
                                 </select>
-                                 @if ($errors->has('department_id'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('department_id') }}</strong>
-                                    </span>
+                                @if ($errors->has('department_id'))
+                                <span class="help-block">
+                                    <strong>{{ $errors->first('department_id') }}</strong>
+                                </span>
                                 @endif
                             </div>
                         </div>

@@ -25,13 +25,9 @@
 </head>
 <body>
 
-@if ($message = Session::get('success'))
-        <div class="alert alert-success">
-            <p>{{ $message }}</p>
-        </div>
-    @endif
     
   <div class="container ">
+    
 
     <div class="col-sm-4">
       <a class="btn btn-primary" href="{{ route('users.create') }}">Add new users</a>
@@ -42,6 +38,18 @@
         <p>{{ \Session::get('success') }}</p>
       </div><br />
       @endif
+
+       @if ($message = Session::get('success'))
+        <div class="alert alert-success">
+            <p>{{ $message }}</p>
+        </div>
+    @endif
+
+            @if ($message = Session::get('error'))
+        <div class="alert alert-success">
+            <p>{{ $message }}</p>
+        </div>
+    @endif
 
 
       <table id="toop" class="table table-bordered table-hover dataTable" role="grid">

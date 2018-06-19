@@ -12,10 +12,10 @@ use Illuminate\Support\Facades\DB;
 class TaskController extends Controller
 {
 
-   public function __construct()
-   {
-    $this->middleware('auth');
-}
+ public function __construct()
+ {
+    // $this->middleware('auth');
+ }
     /**
      * Display a listing of the resource.
      *
@@ -54,20 +54,25 @@ class TaskController extends Controller
     public function store(Request $request)
     {
 
-       $this->validateInput($request);
+     $valid=$this->validateInput($request);
+     
+     if(!$valid){
+        return back()
+        ->with('error', 'Invalid input');
+    }
 
-       $path = $request->file('attachment')->store('avatars');
+    $path = $request->file('attachment')->store('avatars');
 
-       $keys = ['title','description','deadline','employee_id',];
+    $keys = ['title','description','deadline','employee_id',];
 
-       $input = $this->createQueryInput($keys,$request);
-       $input['attachment'] = $path;
+    $input = $this->createQueryInput($keys,$request);
+    $input['attachment'] = $path;
 
-       Task::create($input);
+    Task::create($input);
 
-       return redirect()->intended('/tasks')
-       ->with('success','Task deleted successfully');;
-   }
+    return redirect()->intended('/tasks')
+    ->with('success','Task deleted successfully');;
+}
 
 
     /**
@@ -89,9 +94,9 @@ class TaskController extends Controller
     public function edit($id)
     {
 
-       $task = Employee::find($id);
+     $task = Employee::find($id);
         // Redirect to state list if updating state wasn't existed
-       if ($task == null || count($task) == 0) {
+     if ($task == null || count($task) == 0) {
         return redirect()->intended('/tasks');
     }
 
@@ -111,9 +116,14 @@ class TaskController extends Controller
     public function update(Request $request, $id)
     {
         $task = Task::findOrFail($id);
-        $this->validateInput($request);
+        $valid=$this->validateInput($request);
+        if(!$valid){
+            return back()
+            ->with('error', 'Invalid input');
+        }
         // Upload image
         $keys = ['title','description','deadline','employee_id',];
+
         $input = $this->createQueryInput($keys, $request);
         if ($request->file('attachment')) {
             $path = $request->file('attachment')->store('avatars');
@@ -136,12 +146,12 @@ class TaskController extends Controller
      */
     public function destroy($id)
     {
-       Task::where('id', $id)->delete();
-       return redirect()->intended('/tasks')
-       ->with('success','Task deleted successfully');;
-   }
+     Task::where('id', $id)->delete();
+     return redirect()->intended('/tasks')
+     ->with('success','Task deleted successfully');;
+ }
 
-   private function validateInput($request) {
+ private function validateInput($request) {
     
     $this->validate($request, [
         'title' => 'required|max:60',

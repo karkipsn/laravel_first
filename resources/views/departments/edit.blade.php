@@ -25,6 +25,12 @@
         </div>
     @endif
 
+@if ($message = Session::get('error'))
+        <div class="alert alert-success">
+            <p>{{ $message }}</p>
+        </div>
+    @endif
+
 
     <form action="{{ route('departments.update',$department->id) }}" method="POST">
         @csrf

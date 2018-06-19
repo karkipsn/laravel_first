@@ -23,7 +23,7 @@ class TasksTableSeeder extends Seeder
     			'deadline' => $faker-> date($format = 'Y-m-d', $max = 'now'),
     			 'created_at' => $faker->dateTime($max = 'now'),
                 'updated_at' => $faker->dateTime($max = 'now'),
-                'deleted_at' => $faker->dateTime($max = 'now'),
+                
 
 
     		]);

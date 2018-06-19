@@ -38,11 +38,11 @@ class DepartmentController extends Controller
 
     public function store(Request $request)
     {
-      $valid= $this->validateInput($request);
-      if(!$valid){
-        return back()
-        ->with('error', 'Invalid input');
-    }
+       $this->validateInput($request);
+    //   if(!$valid){
+    //     return back()
+    //     ->with('error', 'Invalid input');
+    // }
 
     Department::create([
         'name' => $request['name']
@@ -101,12 +101,12 @@ private function validateInput($request) {
 
         $department = Department::findOrFail($id);
 
-        $valid=$this->validateInput($request);
+        $this->validateInput($request);
 
-        if(!$valid){
-            return back()
-            ->with('error', 'Invalid input');
-        }
+        // if(!$valid){
+        //     return back()
+        //     ->with('error', 'Invalid input');
+        // }
 
         $input = ['name' => $request['name']];
 

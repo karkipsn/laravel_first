@@ -8,60 +8,64 @@
                 <div class="panel-heading">Update EmployeeTask</div>
                 <div class="panel-body">
 
-                    @if ($message = Session::get('error'))
-                    <div class="alert alert-success">
-                        <p>{{ $message }}</p>
+                   @if ($errors->any())
+                   <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+                <form class="form-horizontal" role="form" method="POST" action="{{ route('tasks.update', ['id' => $tasks->id]) }}">
+                    <input type="hidden" name="_method" value="PATCH">
+                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+
+
+                    <div class="form-group{{ $errors->has('employee_id') ? ' has-error' : '' }}">
+                        <label class="col-md-4 control-label">Employee</label>
+                        <div class="col-md-6">
+                            <select class="form-control" name="employee_id">
+                                @foreach ($employees as $employee)
+                                <option value="{{$employee->id}}">{{$employee->id}}</option>
+                                @endforeach
+                            </select>
+                            @if ($errors->has('employee_id'))
+                            <span class="help-block">
+                                <strong>{{ $errors->first('employee_id') }}</strong>
+                            </span>
+                            @endif
+                        </div>
                     </div>
-                    @endif
-                    <form class="form-horizontal" role="form" method="POST" action="{{ route('tasks.update', ['id' => $task->id]) }}">
-                        <input type="hidden" name="_method" value="PATCH">
-                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
+                    
+                    <div class="form-group{{ $errors->has('title') ? ' has-error' : '' }}">
+                        <label for="title" class="col-md-4 control-label">Title</label>
 
-                        <div class="form-group{{ $errors->has('employee_id') ? ' has-error' : '' }}">
-                            <label class="col-md-4 control-label">Employee</label>
-                            <div class="col-md-6">
-                                <select class="form-control" name="employee_id">
-                                    @foreach ($employees as $employee)
-                                    <option value="{{$employee->id}}">{{$employee->name}}</option>
-                                    @endforeach
-                                </select>
-                                @if ($errors->has('employee_id'))
-                                <span class="help-block">
-                                    <strong>{{ $errors->first('employee_id') }}</strong>
-                                </span>
-                                @endif
-                            </div>
+                        <div class="col-md-6">
+                            <input id="title" type="text" class="form-control" name="title" value="{{ old('title') }}" required>
+
+                            @if ($errors->has('title'))
+                            <span class="help-block">
+                                <strong>{{ $errors->first('title') }}</strong>
+                            </span>
+                            @endif
                         </div>
+                    </div>
 
-                        
-                        <div class="form-group{{ $errors->has('title') ? ' has-error' : '' }}">
-                            <label for="title" class="col-md-4 control-label">Title</label>
+                    <div class="form-group{{ $errors->has('description') ? ' has-error' : '' }}">
+                        <label for="description" class="col-md-4 control-label">Description
+                        </label>
+                        <div class="col-md-6">
+                            <input id="description" type="text" class="form-control" name="description" value="{{ old('description') }}" required>
 
-                            <div class="col-md-6">
-                                <input id="title" type="text" class="form-control" name="title" value="{{ old('title') }}" required>
-
-                                @if ($errors->has('title'))
-                                <span class="help-block">
-                                    <strong>{{ $errors->first('title') }}</strong>
-                                </span>
-                                @endif
-                            </div>
+                            @if ($errors->has('description'))
+                            <span class="help-block">
+                                <strong>{{ $errors->first('description') }}</strong>
+                            </span>
+                            @endif
                         </div>
-
-                        <div class="form-group{{ $errors->has('description') ? ' has-error' : '' }}">
-                            <label for="description" class="col-md-4 control-label">Description
-                            </label>
-                            <div class="col-md-6">
-                                <input id="description" type="text" class="form-control" name="description" value="{{ old('description') }}" required>
-
-                                @if ($errors->has('description'))
-                                <span class="help-block">
-                                    <strong>{{ $errors->first('description') }}</strong>
-                                </span>
-                                @endif
-                            </div>
-                        </div>
+                    </div>
 
                         <!-- <div class="form-group{{ $errors->has('attachment') ? ' has-error' : '' }}">
                             <label for="attachment" class="col-md-4 control-label">Attachment</label>

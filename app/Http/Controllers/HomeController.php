@@ -35,18 +35,18 @@ class HomeController extends Controller
          ->editColumn('id', 'ID: {{$id}}')
          ->removeColumn('password')
          ->make(true);
-         
+
 
      }
      public function index()
      {
-        
+
         $users=User::latest()->paginate(5);
 
         return view('users/index',compact('users'))
         ->with('i', (request()->input('page', 1) - 1) * 5);
 
-        
+
 
     }
      /**
@@ -74,13 +74,13 @@ class HomeController extends Controller
         'lname' => $request['lname'],
         'email' => $request['email'],
         'password' => Hash::make($request['password'])
-        
+
     ]);
 
     return redirect()->intended('users')
     ->with('success', 'You are logged in!');
 
-    
+
 }
 
 
@@ -125,7 +125,6 @@ public function destroy($id){
    if($province != null){
     $province->delete();
     
-
 }
 return redirect()->intended('/users')
 ->with('success','User has been deleted Successfully');}
@@ -152,4 +151,3 @@ private function createQueryInput($keys, $request) {
     return $queryInput;
 }
 }
-z

@@ -7,13 +7,17 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Add tasks for employee</div>
                 <div class="panel-body">
-
-                    @if ($message = Session::get('error'))
-                    <div class="alert alert-success">
-                        <p>{{ $message }}</p>
+                    
+                    @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
                     </div>
                     @endif
-
+                    
                     <form class="form-horizontal" role="form" method="POST" action="{{ route('tasks.store') }}"enctype="multipart/form-data">{{ csrf_field() }}
 
                         <div class="form-group{{ $errors->has('employee_id') ? ' has-error' : '' }}">
@@ -22,7 +26,7 @@
                                 <select class="form-control" name="employee_id">
                                     
                                     @foreach ($employees as $employee)
-                                    <option value="{{$employee->id}}">{{$employee->name}}</option>
+                                    <option value="{{$employee->id}}">{{$employee->id}}</option>
                                     @endforeach
                                 </select>
                                 @if ($errors->has('employee_id'))
@@ -63,7 +67,7 @@
                         </div>
 
 
-                         <div class="form-group">
+                        <div class="form-group">
                             <label for="avatar" class="col-md-4 control-label" >Attachment</label>
                             <div class="col-md-6">
                                 <input type="file" id="attachment" name="attachment" required >
@@ -103,7 +107,7 @@
                                 </button>
                             </div>
                         </div>
-                    
+                        
                     </form>
                 </div>
             </div>

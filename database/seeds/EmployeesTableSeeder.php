@@ -24,8 +24,7 @@ class EmployeesTableSeeder extends Seeder
     			'department_id' => $faker->numberBetween($min = 1, $max = 5),
     			 'created_at' => $faker->dateTime($max = 'now'),
                 'updated_at' => $faker->dateTime($max = 'now'),
-                'deleted_at' => $faker->dateTime($max = 'now'),
-
+               
 
     		]);
     	

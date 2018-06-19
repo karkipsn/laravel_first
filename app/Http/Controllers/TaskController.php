@@ -14,7 +14,7 @@ class TaskController extends Controller
 
    public function __construct()
    {
-    // $this->middleware('auth');
+     $this->middleware('auth');
    }
     /**
      * Display a listing of the resource.
@@ -44,7 +44,6 @@ class TaskController extends Controller
             'employees' => $employees]);
     }
     
-
     /**
      * Store a newly created resource in storage.
      *
@@ -54,12 +53,12 @@ class TaskController extends Controller
     public function store(Request $request)
     {
 
-       $valid=$this->validateInput($request);
+       $this->validateInput($request);
        
-       if(!$valid){
-        return back()
-        ->with('error', 'Invalid input');
-    }
+    //    if(!$valid){
+    //     return back()
+    //     ->with('error', 'Invalid input');
+    // }
 
     $path = $request->file('attachment')->store('avatars');
 
@@ -96,9 +95,9 @@ class TaskController extends Controller
 
        $task = Employee::find($id);
         // Redirect to state list if updating state wasn't existed
-       if ($task == null || count($task) == 0) {
-        return redirect()->intended('/tasks');
-    }
+    //    if ($task == null || count($task) == 0) {
+    //     return redirect()->intended('/tasks');
+    // }
 
     $employees = Employee::all();
 
@@ -116,20 +115,19 @@ class TaskController extends Controller
     public function update(Request $request, $id)
     {
         $task = Task::findOrFail($id);
-        $valid=$this->validateInput($request);
-        if(!$valid){
-            return back()
-            ->with('error', 'Invalid input');
-        }
-        // Upload image
+        $this->validateInput($request);
+        // if(!$valid){
+        //     return back()
+        //     ->with('error', 'Invalid input');
+        // }
+        // // Upload image
         $keys = ['title','description','deadline','employee_id',];
 
         $input = $this->createQueryInput($keys, $request);
+         $path = $request->file('attachment')->store('avatars');
         if ($request->file('attachment')) {
-            $path = $request->file('attachment')->store('avatars');
             $input['attachment'] = $path;
         }
-
 
         Task::where('id', $id)
         ->update($input);
@@ -154,11 +152,11 @@ class TaskController extends Controller
    private function validateInput($request) {
     
     $this->validate($request, [
-        'title' => 'required|max:60',
-        'description' => 'required|max:120',
-        'deadline' => 'required',
+        'title' => 'required|string|max:60',
+        'description' => 'required|string|max:120',
+        'deadline' => 'required|date',
         'attachment' => 'required|file|image|mimes:jpeg,png,gif,webp|max:2048',
-        'employee_id' => 'required'
+        'employee_id' => 'required|integer'
 
     ]);
 }

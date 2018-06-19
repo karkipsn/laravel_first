@@ -57,12 +57,12 @@ class EmployeeController extends Controller
     public function store(Request $request)
     {
 
-       $valid=$this->validateInput($request);
-       if(!$valid){
-        return back()
-        ->with('error', 'Invalid input');
-    }
-    
+       $this->validateInput($request);
+    //    if(!$valid){
+    //     return back()
+    //     ->with('error', 'Invalid input');
+    // }
+
     $keys = ['name', 'add', 'birthdate', 'date_hired', 'department_id', 'department_id', ];
     $input = $this->createQueryInput($keys, $request);
 
@@ -129,16 +129,15 @@ class EmployeeController extends Controller
     {
        $employee = Employee::find($id);
         // Redirect to state list if updating state wasn't existed
-       if ($employee == null || count($employee) == 0) {
-        return redirect()->intended('/employees');
-    }
+    //    if ($employee == null || count($employee) == 0) {
+    //     return redirect()->intended('/employees');
+    // }
 
     $departments = Department::all();
 
     return view('employees/edit', ['employee' => $employee, 
         'departments' => $departments]);
 }
-
 
     /**
      * Update the specified resource in storage.
@@ -151,11 +150,11 @@ class EmployeeController extends Controller
     {
         $employee = Employee::findOrFail($id);
 
-        $valid=$this->validateInput($request);
-        if(!$valid){
-            return back()
-            ->with('error', 'Invalid input');
-        }
+       $this->validateInput($request);
+        // if(!$valid){
+        //     return back()
+        //     ->with('error', 'Invalid input');
+        // }
         // Upload image
         $keys = ['name',  'add', 'birthdate', 'date_hired', 'department_id', 'department_id'];
         $input = $this->createQueryInput($keys, $request);
@@ -175,19 +174,26 @@ class EmployeeController extends Controller
      */
     public function destroy($id)
     {
-       Employee::where('id', $id)->delete();
+       $province= Employee::where('id', $id)->first();
+
+    if($province != null){
+    $province->delete();
+    
+}
+    
        return redirect()->intended('/employees')
        ->with('success','EMployee deleted successfully');;
    }
-
+  
    private function validateInput($request) {
     $this->validate($request, [
-        'name' => 'required|max:60',
-        'add' => 'required|max:120',
-        'birthdate' => 'required',
-        'date_hired' => 'required',
-        'department_id' => 'required'
+        'name' => 'required|string|max:10',
+        'add' => 'required|string|max:120',
+        'birthdate' => 'required|date',
+        'date_hired' => 'required|date',
+        'department_id' => 'required|integer'
     ]);
+
 }
 
 

@@ -9,18 +9,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Employee extends Model
 {   
 
-   use SoftDeletes;
-	protected $table = 'employees';
-     protected $fillable = [
-        'name', 'add','date_hired','birthdate','department_id',
-    ];
-    protected $dates = ['deleted_at'];
+ use SoftDeletes;
 
-     public function depaertment(){
-    	return $this->belongsTo(Department::class);
-    }
+ protected $table = 'employees';
+ protected $dates = ['deleted_at'];
 
-    public function tasks(){
-    	return $this->hasMany(Task::class);
-    }
+ protected $fillable = [
+    'name', 'add','date_hired','birthdate','department_id',
+];
+
+public function depaertment(){
+   return $this->belongsTo(Department::class);
+}
+
+public function tasks(){
+   return $this->hasMany(Task::class);
+}
 }

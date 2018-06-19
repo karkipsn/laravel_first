@@ -19,11 +19,6 @@
   </div>
   <!-- /.box-header -->
   <div class="box-body">
-    @if ($message = Session::get('success'))
-        <div class="alert alert-success">
-            <p>{{ $message }}</p>
-        </div>
-    @endif
     
       <div class="row">
         <div class="col-sm-6"></div>
@@ -57,17 +52,16 @@
                   <td class="hidden-xs">{{ $employee->department_name }}</td>
                   <td class="hidden-xs">{{ $employee->department_id }}</td>
                   <td>
-                    <form class="row" method="POST" action="{{ route('employees.destroy', ['id' => $employee->id]) }}" onsubmit = "return confirm('Are you sure?')">
-                        <input type="hidden" name="_method" value="DELETE">
-                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                        <a href="{{ route('employees.edit', ['id' => $employee->id]) }}" class="btn btn-warning col-sm-3 col-xs-5 btn-margin">
-                        Update
-                        </a>
-                         <button type="submit" class="btn btn-danger col-sm-3 col-xs-5 btn-margin">
-                          Delete
-                        </button>
-                    </form>
-                  </td>
+         <form class="row" method="POST" action="{{ route('employees.destroy', ['id' => $employee->id]) }}" onsubmit = "return confirm('Are you sure?')">
+          <input type="hidden" name="_method" value="DELETE">
+          <input type="hidden" name="_token" value="{{ csrf_token() }}">
+
+          <a href="{{ route('employees.edit', ['id' => $employee->id]) }}" class="btn btn-warning col-sm-3 col-xs-5 btn-margin">   Update </a>
+
+          <button type="submit" class="btn btn-danger col-sm-3 col-xs-5 btn-margin"> Delete </button>
+
+        </form>
+      </td>
               </tr>
             @endforeach
             </tbody>

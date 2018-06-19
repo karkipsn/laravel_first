@@ -27,28 +27,28 @@ class HomeController extends Controller
      public function getdata()
      {
 
-       $users= User::all();
-       return \DataTables::of($users)
-       ->addColumn('action', function ($user) {
-        return '<a href="/users/'.$user->id.'/edit" class="btn btn-xs btn-primary"><i class="glyphicon glyphicon-edit"></i> Edit</a>';
-    })
-       ->editColumn('id', 'ID: {{$id}}')
-       ->removeColumn('password')
-       ->make(true);
-       
+         $users= User::all();
+         return \DataTables::of($users)
+         ->addColumn('action', function ($user) {
+            return '<a href="/users/'.$user->id.'/edit" class="btn btn-xs btn-primary"><i class="glyphicon glyphicon-edit"></i> Edit</a>';
+        })
+         ->editColumn('id', 'ID: {{$id}}')
+         ->removeColumn('password')
+         ->make(true);
+         
 
-   }
-   public function index()
-   {
-    
-    $users=User::latest()->paginate(5);
+     }
+     public function index()
+     {
+        
+        $users=User::latest()->paginate(5);
 
-    return view('users/index',compact('users'))
-    ->with('i', (request()->input('page', 1) - 1) * 5);
+        return view('users/index',compact('users'))
+        ->with('i', (request()->input('page', 1) - 1) * 5);
 
-    
+        
 
-}
+    }
      /**
      * Show the form for creating a new resource.
      *
@@ -120,9 +120,9 @@ public function update(Request $request, $id){
 }
 public function destroy($id){
 
- $province= User::where('id', $id)->first();
+   $province= User::where('id', $id)->first();
 
- if($province != null){
+   if($province != null){
     $province->delete();
     
 

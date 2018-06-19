@@ -12,14 +12,14 @@ use Illuminate\Support\Facades\DB;
 
 class EmployeeController extends Controller
 {
-   public function __construct()
-   {
+ public function __construct()
+ {
     // $this->middleware('auth');
-   }
+ }
 
 
-   public function index()
-   {
+ public function index()
+ {
     $employees = DB::table('employees')
     ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
     ->select('employees.*', 'departments.name as department_name', 'departments.id as department_id')
@@ -35,14 +35,14 @@ class EmployeeController extends Controller
      */
     public function create()
     {
-     $departments = Department::all();
+       $departments = Department::all();
 
-     return view('employees/create', [
+       return view('employees/create', [
         'departments' => $departments]);
- }
+   }
 
 
- public function add_import(){
+   public function add_import(){
 
     return view ('employees/add_import');
 
@@ -57,8 +57,8 @@ class EmployeeController extends Controller
     public function store(Request $request)
     {
 
-     $valid=$this->validateInput($request);
-     if(!$valid){
+       $valid=$this->validateInput($request);
+       if(!$valid){
         return back()
         ->with('error', 'Invalid input');
     }
@@ -127,9 +127,9 @@ class EmployeeController extends Controller
      */
     public function edit($id)
     {
-     $employee = Employee::find($id);
+       $employee = Employee::find($id);
         // Redirect to state list if updating state wasn't existed
-     if ($employee == null || count($employee) == 0) {
+       if ($employee == null || count($employee) == 0) {
         return redirect()->intended('/employees');
     }
 
@@ -175,12 +175,12 @@ class EmployeeController extends Controller
      */
     public function destroy($id)
     {
-     Employee::where('id', $id)->delete();
-     return redirect()->intended('/employees')
-     ->with('success','EMployee deleted successfully');;
- }
+       Employee::where('id', $id)->delete();
+       return redirect()->intended('/employees')
+       ->with('success','EMployee deleted successfully');;
+   }
 
- private function validateInput($request) {
+   private function validateInput($request) {
     $this->validate($request, [
         'name' => 'required|max:60',
         'add' => 'required|max:120',

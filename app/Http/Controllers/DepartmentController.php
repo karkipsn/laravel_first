@@ -124,12 +124,12 @@ private function validateInput($request) {
      */
     public function destroy($id)
     {
-     Department::where('id', $id)->delete();
+       Department::where('id', $id)->delete();
         //$department->delete();
 
-     return redirect()->route('/departments')
-     ->with('success','Department deleted successfully');
- }
+       return redirect()->route('/departments')
+       ->with('success','Department deleted successfully');
+   }
 
     /**
      * Search department from database base on some specific constraints

@@ -12,10 +12,10 @@ use Illuminate\Support\Facades\DB;
 class TaskController extends Controller
 {
 
- public function __construct()
- {
+   public function __construct()
+   {
     // $this->middleware('auth');
- }
+   }
     /**
      * Display a listing of the resource.
      *
@@ -54,9 +54,9 @@ class TaskController extends Controller
     public function store(Request $request)
     {
 
-     $valid=$this->validateInput($request);
-     
-     if(!$valid){
+       $valid=$this->validateInput($request);
+       
+       if(!$valid){
         return back()
         ->with('error', 'Invalid input');
     }
@@ -94,9 +94,9 @@ class TaskController extends Controller
     public function edit($id)
     {
 
-     $task = Employee::find($id);
+       $task = Employee::find($id);
         // Redirect to state list if updating state wasn't existed
-     if ($task == null || count($task) == 0) {
+       if ($task == null || count($task) == 0) {
         return redirect()->intended('/tasks');
     }
 
@@ -146,12 +146,12 @@ class TaskController extends Controller
      */
     public function destroy($id)
     {
-     Task::where('id', $id)->delete();
-     return redirect()->intended('/tasks')
-     ->with('success','Task deleted successfully');;
- }
+       Task::where('id', $id)->delete();
+       return redirect()->intended('/tasks')
+       ->with('success','Task deleted successfully');;
+   }
 
- private function validateInput($request) {
+   private function validateInput($request) {
     
     $this->validate($request, [
         'title' => 'required|max:60',

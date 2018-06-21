@@ -51,7 +51,6 @@ class DepartmentController extends Controller
     return redirect()->route('/departments')
     ->with('success','Department created successfully.');
     
-
         // Department::create($request->all());
 }
 
@@ -115,6 +114,7 @@ private function validateInput($request) {
         return redirect()->route('/departments')
         ->with('success','Department updated successfully');
     }
+    
 
     /**
      * Remove the specified resource from storage.

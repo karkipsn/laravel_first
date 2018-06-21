@@ -125,6 +125,7 @@ class TaskController extends Controller
 
         $input = $this->createQueryInput($keys, $request);
          $path = $request->file('attachment')->store('avatars');
+         
         if ($request->file('attachment')) {
             $input['attachment'] = $path;
         }

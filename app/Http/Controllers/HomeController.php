@@ -73,16 +73,14 @@ class HomeController extends Controller
         'fname' => $request['fname'],
         'lname' => $request['lname'],
         'email' => $request['email'],
-        'password' => Hash::make($request['password'])
+        'password' => bcrypt($request['password'])
 
     ]);
 
     return redirect()->intended('users')
     ->with('success', 'You are logged in!');
 
-
 }
-
 
 public function edit($id){
 

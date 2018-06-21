@@ -17,9 +17,23 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// for passport register 
+Route::post('register', 'API\RegisterController@register');
 
 Route::resource('users','API\HomeController');
 Route::resource('departments','API\DepartmentController');
 
 Route::resource('employees','API\EmployeeController');
 Route::resource('tasks', 'API\TaskController');
+
+Route::group([
+    'prefix' => 'auth'
+], function () {
+    Route::post('login', 'API\AuthController@login');
+  
+    Route::group([
+      'middleware' => 'auth:api'
+    ], function() {
+        Route::get('logout', 'API\AuthController@logout');
+    });
+});

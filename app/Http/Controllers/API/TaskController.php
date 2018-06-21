@@ -29,7 +29,7 @@ class TaskController extends BaseController
      */
     public function create()
     {
-      
+
 }
     /**
      * Store a newly created resource in storage.
@@ -46,7 +46,7 @@ class TaskController extends BaseController
            'description' => 'required|string|max:120',
            'deadline' => 'required|date',
            'attachment' => 'required|file|image|mimes:jpeg,png,gif,webp|max:2048',
-           'employee_id' => 'required|integer'
+           'employee_id' => 'required|exists:employees,id'
            
        ]);
 
@@ -101,7 +101,7 @@ class TaskController extends BaseController
             'description' => 'required|string|max:120',
             'deadline' => 'required|date',
             'attachment' => 'required|file|image|mimes:jpeg,png,gif,webp|max:2048',
-            'employee_id' => 'required|integer'
+            'employee_id' => 'required|exists:employees,id'
         ]);
 
         if($validator->fails()){

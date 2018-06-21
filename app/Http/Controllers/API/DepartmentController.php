@@ -19,7 +19,7 @@ class DepartmentController extends BaseController
     {
        $departments = Department::all();
 
-       return $this->sendResponse(json_decode($departments), 'Departments retrieved successfully.');
+       return $this->sendResponse($departments->toArray(), 'Departments retrieved successfully.');
    }
 
     /**
@@ -40,7 +40,7 @@ class DepartmentController extends BaseController
      */
     public function store(Request $request)
     {
-         $input = $request->json()->all();
+         $input = $request->all();
 
        $validator = Validator::make($input, [
         'name' => 'required|string|max:60|unique:departments',
@@ -91,7 +91,7 @@ class DepartmentController extends BaseController
      */
     public function update(Request $request, Department $department)
     {
-        $input = $request->json()->all();
+        $input = $request->all();
 
         $validator = Validator::make($input, [
             'name' => 'required|string|max:60|unique:departments',

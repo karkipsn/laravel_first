@@ -53,14 +53,14 @@ class HomeController extends BaseController
         return $this->sendError('Validation Error.', $validator->errors());       
     }
 
-    $input = $request->json()->all();
+    $input = $request->all();
 
     $input['password'] = bcrypt($input['password']);
     $user = User::create($input);
     $success['fname'] =  $user->fname;
     $success['lname'] =  $user->lname;
     $success['email'] =  $user->email;
-    
+
     return $this->sendResponse($success, 'User register successfully.');     
 }
 

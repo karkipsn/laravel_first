@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller as Controller;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Employee;
+use App\Department;
 use Validator;
 
 
@@ -19,8 +20,7 @@ class EmployeeController extends BaseController
     public function index()
     {
        $employees = Employee::all();
-
-       return $this->sendResponse($employees->toArray(), 'Employees retrieved successfully.');
+       return $this->sendResponse(json_decode($employees), 'Employees retrieved successfully.');
    }
 
     /**
@@ -43,12 +43,14 @@ class EmployeeController extends BaseController
     {
          $input = $request->all();
 
+         // $department = Department::all();
+
        $validator = Validator::make($input, [
         'name' => 'required|string|max:10',
         'add' => 'required|string|max:120',
         'birthdate' => 'required|date',
         'date_hired' => 'required|date',
-        'department_id' => 'required|integer',
+        'department_id' => 'required|exists:departments,id',
 
     ]);
 
@@ -96,15 +98,15 @@ class EmployeeController extends BaseController
      */
     public function update(Request $request, Employee $employee)
     {
-        $input = $request->json()->all();
-        
+        $input = $request->all();
+
 
         $validator = Validator::make($input, [
             'name' => 'required|string|max:10',
             'add' => 'required|string|max:120',
             'birthdate' => 'required|date',
             'date_hired' => 'required|date',
-            'department_id' => 'required|integer',
+            'department_id' => 'required|exists:departments,id',
         ]);
 
         if($validator->fails()){

@@ -18,13 +18,52 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 // for passport register 
-Route::post('register', 'API\RegisterController@register');
+Route::post('register',array('before' => 'isJson', 'uses' => 'API\RegisterController@register'));
 
-Route::resource('users','API\HomeController');
-Route::resource('departments','API\DepartmentController');
 
-Route::resource('employees','API\EmployeeController');
-Route::resource('tasks', 'API\TaskController');
+//Route::resource('users','API\HomeController');
+Route::get('users',array('before' => 'isJson', 'uses' => 
+	'API\HomeController@index'));
+Route::post('users',array('before' => 'isJson', 'uses' => 
+	'API\HomeController@store'));
+Route::get('users/{user}',array('before' => 'isJson', 'uses' => 
+	'API\HomeController@show'));
+Route::patch('users/{user}',array('before' => 'isJson', 'uses' => 
+	'API\HomeController@update'));
+Route::delete('users/{user}',array('before' => 'isJson', 'uses' => 
+	'API\HomeController@destroy'));
+
+// Route::resource('departments','API\DepartmentController');
+
+Route::get('departments',array('before' => 'isJson', 'uses' => 
+	'API\DepartmentController@index'));
+Route::get('departments/{department}',array('before' => 'isJson', 'uses' => 
+	'API\DepartmentController@show'));
+Route::post('departments',array('before' => 'isJson', 'uses' => 
+	'API\DepartmentController@store'));
+Route::patch('departments/{department}',array('before' => 'isJson', 'uses' => 
+	'API\DepartmentController@update'));
+Route::delete('departments/{department}',array('before' => 'isJson', 'uses' => 
+	'API\DepartmentController@destroy'));
+
+// Route::resource('employees','API\EmployeeController');
+
+Route::get('employees',array('before' => 'isJson', 'uses' => 'API\EmployeeController@index'));
+Route::get('employees/{employee}',array('before' => 'isJson', 'uses' => 'API\EmployeeController@show'));
+Route::post('employees',array('before' => 'isJson', 'uses' => 'API\EmployeeController@store'));
+Route::patch('employees/{employee}',array('before' => 'isJson', 'uses' => 'API\EmployeeController@update'));
+Route::delete('employees/{employee}',array('before' => 'isJson', 'uses' => 'API\EmployeeController@destroy'));
+
+// Route::resource('tasks', 'API\TaskController');
+
+Route::get('tasks',array('before' => 'isJson', 
+	'uses' => 'API\TaskController@index'));
+Route::get('tasks/{task}',array('before' => 'isJson', 'uses' => 'API\TaskController@show'));
+Route::post('tasks',array('before' => 'isJson', 'uses' =>
+ 'API\TaskController@store'));
+Route::patch('tasks/{task}',array('before' => 'isJson', 'uses' => 'API\TaskController@update'));
+Route::delete('tasks/{task}',array('before' => 'isJson', 'uses' => 'API\TaskController@destroy'));
+
 
 Route::group([
     'prefix' => 'auth'

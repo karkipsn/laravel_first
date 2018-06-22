@@ -51,7 +51,7 @@ class TaskController extends BaseController
        ]);
 
        if($validator->fails()){
-        return $this->sendError('Validation Error.', $validator->errors());       
+        return $this->sendError('Validation Error or Invalid Json Format..', $validator->errors());       
     }
     $task = Task::create($input);
     return $this->sendResponse($task->toArray(), 'Task created successfully.');
@@ -105,7 +105,7 @@ class TaskController extends BaseController
         ]);
 
         if($validator->fails()){
-            return $this->sendError('Validation Error.', $validator->errors());       
+            return $this->sendError('Validation Error or Invalid Json Format.', $validator->errors());       
         }
         $task->title = $input['title'];
         $task->description = $input['description'];

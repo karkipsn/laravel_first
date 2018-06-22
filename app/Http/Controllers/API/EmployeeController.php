@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller as Controller;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Employee;
 use App\Department;
+use APIErrorValidationResponse;
 use Validator;
 
 
@@ -44,6 +45,15 @@ class EmployeeController extends BaseController
          $input = $request->all();
 
          // $department = Department::all();
+       
+          $messages = [
+    'name.required' => 'The :attribute is required',
+    'add.required' => 'The :attribute is required',
+    'birthdate.required' => 'The :attribute is required',
+    'date_hired.required' => 'The :attribute is required',
+    'department_id.required' => 'The :attribute is required',
+
+];
 
        $validator = Validator::make($input, [
         'name' => 'required|string|max:10',
@@ -52,10 +62,11 @@ class EmployeeController extends BaseController
         'date_hired' => 'required|date',
         'department_id' => 'required|exists:departments,id',
 
-    ]);
+    ], $messages);
 
        if($validator->fails()){
-        return $this->sendError('Validation Error.', $validator->errors());       
+         //return new APIErrorValidationResponse($request, $validator);
+        return $this->sendError('Validation Error or Invalid Json Format.', $validator->errors());       
     }
     $department = Employee::create($input);
     return $this->sendResponse($department->toArray(), 'Employee created successfully.');
@@ -100,17 +111,29 @@ class EmployeeController extends BaseController
     {
         $input = $request->all();
 
-
+           $messages = [
+    'name.required' => 'The name:attribute is required',
+    'add.required' => 'The add:attribute is required',
+    'birthdate.required' => 'The birthdate:attribute is required',
+    'date_hired.required' => 'The date_hired:attribute is required',
+    'department_id.required' => 'The department_id:attribute is required',
+    
+    'name.json' => 'The name :attribute field must be valid JSON',
+    'add .json' => 'The :add attribute field must be valid JSON',
+    'birthdate.json' => 'The birthdate :attribute field must be valid JSON',
+    'date_hired.json' => 'The date_hired :attribute field must be valid JSON',
+    'department_id.json' => 'The department_id :attribute field must be valid JSON',
+];
         $validator = Validator::make($input, [
             'name' => 'required|string|max:10',
             'add' => 'required|string|max:120',
             'birthdate' => 'required|date',
             'date_hired' => 'required|date',
             'department_id' => 'required|exists:departments,id',
-        ]);
+        ],$messages);
 
         if($validator->fails()){
-            return $this->sendError('Validation Error.', $validator->errors());       
+            return $this->sendError('Validation Error or Invalid Json Format.', $validator->errors());       
         }
         $employee->name = $input['name'];
         $employee->add = $input['add'];

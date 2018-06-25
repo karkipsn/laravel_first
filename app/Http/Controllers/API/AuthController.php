@@ -26,10 +26,12 @@ class AuthController extends Controller
             ], 401);
 
         $user = $request->user();
+
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
         if ($request->remember_me)
             $token->expires_at = Carbon::now()->addWeeks(1);
+
         $token->save();
 
 
@@ -44,9 +46,30 @@ class AuthController extends Controller
 
      public function logout(Request $request)
     {
-        $request->user()->token()->revoke();
-        return response()->json([
-            'message' => 'Successfully logged out'
-        ]);
+        
+        $value = $request->bearerToken();
+        $id= (new Parser())->parse($value)->getHeader('jti');
+
+        $token=  DB::table('oauth_access_tokens')
+            ->where('id', '=', $id)
+            ->update(['revoked' => true]);
+
+
+        $this->guard()->logout();
+
+        $request->session()->flush();
+
+        $request->session()->regenerate();
+
+        $json = [
+            'success' => true,
+            'code' => 200,
+            'message' => 'You are Logged out.',
+        ];
+        return response()->json($json, '200');
+
+        // return response()->json([
+        //     'message' => 'Successfully logged out'
+        // ]);
     }
 }

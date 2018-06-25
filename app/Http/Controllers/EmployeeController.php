@@ -1,16 +1,20 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Excel;
 use File;
 use Session;
 use App\Employee;
 use App\Department;
 use Datatables;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class EmployeeController extends Controller
+use Validator;
+use App\Http\Controllers\Controller as Controller;
+use App\Http\Controllers\BaseController as BaseController;
+
+class EmployeeController extends BaseController
 {
  public function __construct()
  {
@@ -22,8 +26,8 @@ class EmployeeController extends Controller
  {
     $employees = DB::table('employees')
     ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
-    ->select('employees.*', 'departments.name as department_name', 'departments.id as department_id')
-    ->paginate(5);
+    ->select('employees.*', 'departments.name as department_name', 'departments.id as department_id')->paginate(5);
+    // ->paginate(5);
 
     return view('employees/index', ['employees' => $employees]);
 }
@@ -56,20 +60,38 @@ class EmployeeController extends Controller
      */
     public function store(Request $request)
     {
+        $input = $request->all();
 
-       $this->validateInput($request);
-    //    if(!$valid){
-    //     return back()
-    //     ->with('error', 'Invalid input');
-    // }
+        $validator = Validator::make($input, [
+            'name' => 'required|string|max:10',
+            'add' => 'required|string|max:120',
+            'birthdate' => 'required|date',
+            'date_hired' => 'required|date',
+            'department_id' => 'required|exists:departments,id',
 
-    $keys = ['name', 'add', 'birthdate', 'date_hired', 'department_id', 'department_id', ];
-    $input = $this->createQueryInput($keys, $request);
+        ]);
+        if($validator->fails()){
 
-    Employee::create($input);
+            if($type ==1){
+             return redirect('/employees')
+             ->withErrors($validator)
+             ->withInput();
+         }
 
-    return redirect()->intended('/employees')
-    ->with('success','Employee created successfully');;
+         if( $request->wantsJson()){
+            return $this->sendError('Validation Error.', $validator->errors());
+        }   
+    }
+    $employee = Employee::create($input);
+
+    if($type ==1){
+
+       return redirect('/employees')
+       ->with('success','Employee created successfully.');
+   }
+   if($request->wantsJson()){
+       return $this->sendResponse($employee->toArray(), 'Employee created successfully.');
+   }
 }
 
     /**
@@ -128,16 +150,13 @@ class EmployeeController extends Controller
     public function edit($id)
     {
        $employee = Employee::find($id);
-        // Redirect to state list if updating state wasn't existed
-    //    if ($employee == null || count($employee) == 0) {
-    //     return redirect()->intended('/employees');
-    // }
 
-    $departments = Department::all();
 
-    return view('employees/edit', ['employee' => $employee, 
+       $departments = Department::all();
+
+       return view('employees/edit', ['employee' => $employee, 
         'departments' => $departments]);
-}
+   }
 
     /**
      * Update the specified resource in storage.
@@ -148,23 +167,66 @@ class EmployeeController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $employee = Employee::findOrFail($id);
+        try {
 
-       $this->validateInput($request);
-        // if(!$valid){
-        //     return back()
-        //     ->with('error', 'Invalid input');
-        // }
-        // Upload image
-        $keys = ['name',  'add', 'birthdate', 'date_hired', 'department_id', 'department_id'];
-        $input = $this->createQueryInput($keys, $request);
+            $input = Employee::findOrFail($id);
 
-        Employee::where('id', $id)
-        ->update($input);
+            $type = $request->input('type');
 
+            if($input == null){
         return redirect()->intended('/employees')
-        ->with('success','Employee updated successfully');;
+        ->with('Error','No Such Employees Exists');
     }
+
+            $validator = Validator::make($input, [
+                'name' => 'required|string|max:10',
+                'add' => 'required|string|max:120',
+                'birthdate' => 'required|date',
+                'date_hired' => 'required|date',
+                'department_id' => 'required|exists:departments,id',
+            ]);
+
+            if($validator->fails()){
+
+                if($type ==1){
+                 return redirect('/employees')
+                 ->withErrors($validator)
+                 ->withInput();
+             }
+
+             if( $request->wantsJson()){
+
+                return $this->sendError('Validation Error.', $validator->errors());
+
+            }   
+        }
+
+        $employee->name = $input['name'];
+        $employee->add = $input['add'];
+        $employee->birthdate = $input['birthdate'];
+        $employee->date_hired = $input['date_hired'];
+        $employee->department_id = $input['department_id'];
+        $employee->save();
+
+        if($type ==1){
+
+           return redirect('/employees')
+           ->with('success','Employee updated successfully.');
+       }
+       if($request->wantsJson()){
+           return $this->sendResponse($employee->toArray(), 'Employee updated successfully.');
+
+       }
+   } catch (Exception $e) {
+    if($type ==1){
+
+       return redirect('/employees')
+       ->with('success','Employee updated UnSuccessfull.');
+   }
+   if($request->wantsJson()){
+      return $this->sendError('Employee delete Unsuccessful.', $e->getMessage());  
+  }
+}}
 
     /**
      * Remove the specified resource from storage.
@@ -174,36 +236,38 @@ class EmployeeController extends Controller
      */
     public function destroy($id)
     {
-       $province= Employee::where('id', $id)->first();
+       $del= Employee::where('id', $id)->first();
 
-    if($province != null){
-    $province->delete();
-    
-}
-    
-       return redirect()->intended('/employees')
-       ->with('success','EMployee deleted successfully');;
-   }
-  
-   private function validateInput($request) {
-    $this->validate($request, [
-        'name' => 'required|string|max:10',
-        'add' => 'required|string|max:120',
-        'birthdate' => 'required|date',
-        'date_hired' => 'required|date',
-        'department_id' => 'required|integer'
-    ]);
-
-}
-
-
-private function createQueryInput($keys, $request) {
-    $queryInput = [];
-    for($i = 0; $i < sizeof($keys); $i++) {
-        $key = $keys[$i];
-        $queryInput[$key] = $request[$key];
+       if($del == null){
+        return redirect()->intended('/employees')
+        ->with('Error','No Such Employees Exists');
     }
 
-    return $queryInput;
+    $del->delete();
+    
+    return redirect()->intended('/employees')
+    ->with('success','Employee deleted successfully');
 }
+
+// private function validateInput($request) {
+//     $this->validate($request, [
+//         'name' => 'required|string|max:10',
+//         'add' => 'required|string|max:120',
+//         'birthdate' => 'required|date',
+//         'date_hired' => 'required|date',
+//         'department_id' => 'required|integer'
+//     ]);
+
+// }
+
+
+// private function createQueryInput($keys, $request) {
+//     $queryInput = [];
+//     for($i = 0; $i < sizeof($keys); $i++) {
+//         $key = $keys[$i];
+//         $queryInput[$key] = $request[$key];
+//     }
+
+//     return $queryInput;
+// }
 }

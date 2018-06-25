@@ -11,6 +11,8 @@
                     <form class="form-horizontal" role="form" method="POST" action="{{ route('employees.store') }}">
                         {{ csrf_field() }}
                         
+                        {{ Form::hidden('type', 1) }}
+                        
                         <div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
                             <label for="name" class="col-md-4 control-label"> Name</label>
 

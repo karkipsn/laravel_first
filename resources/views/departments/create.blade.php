@@ -30,7 +30,8 @@
 <form action="{{ route('departments.store') }}" method="POST">
     @csrf
 
-
+<!-- <input type="hidden" name="type" value ="secret"> -->
+{{ Form::hidden('type', 1) }}
 
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12">

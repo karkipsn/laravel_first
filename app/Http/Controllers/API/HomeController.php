@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller as Controller;
-use App\Http\Controllers\API\BaseController as BaseController;
+use App\Http\Controllers\BaseController as BaseController;
 use App\User;
 use Validator;
 
@@ -22,15 +22,6 @@ class HomeController extends BaseController
         return $this->sendResponse(json_decode($users), 'Departments retrieved successfully.');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -50,7 +41,7 @@ class HomeController extends BaseController
 
 
       if($validator->fails()){
-        return $this->sendError('Validation Error.', $validator->errors());       
+        return $this->sendError('Validation Error or Format Error.', $validator->errors());       
     }
 
     $input = $request->all();

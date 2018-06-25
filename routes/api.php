@@ -40,9 +40,9 @@ Route::get('departments',array('before' => 'isJson', 'uses' =>
 Route::get('departments/{department}',array('before' => 'isJson', 'uses' => 
 	'API\DepartmentController@show'));
 Route::post('departments',array('before' => 'isJson', 'uses' => 
-	'API\DepartmentController@store'));
+	'DepartmentController@store'));
 Route::patch('departments/{department}',array('before' => 'isJson', 'uses' => 
-	'API\DepartmentController@update'));
+	'DepartmentController@update'));
 Route::delete('departments/{department}',array('before' => 'isJson', 'uses' => 
 	'API\DepartmentController@destroy'));
 
@@ -50,9 +50,10 @@ Route::delete('departments/{department}',array('before' => 'isJson', 'uses' =>
 
 Route::get('employees',array('before' => 'isJson', 'uses' => 'API\EmployeeController@index'));
 Route::get('employees/{employee}',array('before' => 'isJson', 'uses' => 'API\EmployeeController@show'));
-Route::post('employees',array('before' => 'isJson', 'uses' => 'API\EmployeeController@store'));
-Route::patch('employees/{employee}',array('before' => 'isJson', 'uses' => 'API\EmployeeController@update'));
+Route::post('employees',array('before' => 'isJson', 'uses' => 'EmployeeController@store'));
 Route::delete('employees/{employee}',array('before' => 'isJson', 'uses' => 'API\EmployeeController@destroy'));
+Route::patch('employees/{employee}',array('before' => 'isJson', 'uses' => 
+	'API\EmployeeController@update'));
 
 // Route::resource('tasks', 'API\TaskController');
 

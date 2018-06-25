@@ -8,13 +8,16 @@ use App\Employee;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Validator;
+use App\Http\Controllers\Controller as Controller;
+use App\Http\Controllers\BaseController as BaseController;
 
-class TaskController extends Controller
+class TaskController extends BaseController
 {
 
    public function __construct()
    {
-     $this->middleware('auth');
+     // $this->middleware('auth');
    }
     /**
      * Display a listing of the resource.
@@ -53,25 +56,44 @@ class TaskController extends Controller
     public function store(Request $request)
     {
 
-       $this->validateInput($request);
-       
-    //    if(!$valid){
-    //     return back()
-    //     ->with('error', 'Invalid input');
-    // }
+       $input = $request->all();
 
-    $path = $request->file('attachment')->store('avatars');
+       $type = $request->input('type');
 
-    $keys = ['title','description','deadline','employee_id',];
+       $validator = Validator::make($input, [
+         'title' => 'required|string|max:60',
+         'description' => 'required|string|max:120',
+         'deadline' => 'required|date',
+         'attachment' => 'required|file|image|mimes:jpeg,png,gif,webp|max:2048',
+         'employee_id' => 'required|exists:employees,id'
 
-    $input = $this->createQueryInput($keys,$request);
-    $input['attachment'] = $path;
+     ]);
+       $path = $request->file('attachment')->store('avatars');
+       $input['attachment'] = $path;
 
-    Task::create($input);
+       if($validator->fails()){
 
-    return redirect()->intended('/tasks')
-    ->with('success','Task deleted successfully');;
+        if($type ==1){
+         return redirect('/tasks')
+         ->withErrors($validator)
+         ->withInput();
+     }
+
+     if( $request->wantsJson()){
+        return $this->sendError('Validation Error or Format Error.', $validator->errors());
+    }   
 }
+$task = Task::create($input);
+if($type ==1){
+
+   return redirect('/tasks')
+   ->with('success','Task created successfully.');
+}
+if($request->wantsJson()){
+   return $this->sendResponse($task->toArray(), 'Task created successfully.');
+}
+}
+
 
 
     /**
@@ -99,11 +121,11 @@ class TaskController extends Controller
     //     return redirect()->intended('/tasks');
     // }
 
-    $employees = Employee::all();
+       $employees = Employee::all();
 
-    return view('tasks/edit', ['task' => $task, 
+       return view('tasks/edit', ['task' => $task, 
         'employees' => $employees]);
-}
+   }
 
     /**
      * Update the specified resource in storage.
@@ -112,30 +134,60 @@ class TaskController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+
+    public function update(Request $request, Task $task)
     {
-        $task = Task::findOrFail($id);
-        $this->validateInput($request);
-        // if(!$valid){
-        //     return back()
-        //     ->with('error', 'Invalid input');
-        // }
-        // // Upload image
-        $keys = ['title','description','deadline','employee_id',];
 
-        $input = $this->createQueryInput($keys, $request);
-         $path = $request->file('attachment')->store('avatars');
-         
-        if ($request->file('attachment')) {
-            $input['attachment'] = $path;
-        }
+        $input = $request->all();
+        $type = $request->input('type');
 
-        Task::where('id', $id)
-        ->update($input);
+        $validator = Validator::make($input, [
+            'title' => 'required|string|max:60',
+            'description' => 'required|string|max:120',
+            'deadline' => 'required|date',
+            'attachment' => 'required|file|image|mimes:jpeg,png,gif,webp|max:2048',
+            'employee_id' => 'required|exists:employees,id'
+        ]);
 
-        return redirect()->intended('/tasks')
-        ->with('success','Task updated successfully');;
+        if($validator->fails()){
+            if($type ==1){
+             return redirect('/tasks')
+             ->withErrors($validator)
+             ->withInput();
+         }
+
+         if( $request->wantsJson()){
+            return $this->sendError('Validation Error or Format Error.', $validator->errors());
+        }   
     }
+
+    $task->title = $input['title'];
+    $task->description = $input['description'];
+    $task->deadline = $input['deadline'];
+
+    $task->employee_id = $input['employee_id'];
+
+    if ($request->file('attachment')) {
+      $path = $request->file('attachment')->store('avatars');
+      $input['attachment'] = $path;
+      $task->attachment = $input['attachment'];
+  }
+
+  $task->save();
+
+  if($type ==1){
+
+   return redirect('/task')
+   ->with('success','Task created successfully.');
+}
+if($request->wantsJson()){
+   return BaseController::sendResponse($task->toArray(), 'Task created successfully.');
+}
+
+
+return $this->sendResponse($task->toArray(), 'Task updated successfully.');
+
+}
 
     /**
      * Remove the specified resource from storage.
@@ -145,30 +197,37 @@ class TaskController extends Controller
      */
     public function destroy($id)
     {
-       Task::where('id', $id)->delete();
-       return redirect()->intended('/tasks')
-       ->with('success','Task deleted successfully');;
-   }
+       $del =Task::where('id', $id)->delete();
+       if($del == null){
 
-   private function validateInput($request) {
-    
-    $this->validate($request, [
-        'title' => 'required|string|max:60',
-        'description' => 'required|string|max:120',
-        'deadline' => 'required|date',
-        'attachment' => 'required|file|image|mimes:jpeg,png,gif,webp|max:2048',
-        'employee_id' => 'required|integer'
+        return redirect()->intended('/tasks')
+        ->with('Error','Task deletion UnSuccessfull');;
+      }
+   
 
-    ]);
+return redirect()->intended('/tasks')
+->with('success','Task deleted successfully');;
 }
-private function createQueryInput($keys, $request) {
-    $queryInput = [];
-    for($i = 0; $i < sizeof($keys); $i++) {
-        $key = $keys[$i];
-        $queryInput[$key] = $request[$key];
-    }
 
-    return $queryInput;
-}
+// private function validateInput($request) {
+
+//     $this->validate($request, [
+//         'title' => 'required|string|max:60',
+//         'description' => 'required|string|max:120',
+//         'deadline' => 'required|date',
+//         'attachment' => 'required|file|image|mimes:jpeg,png,gif,webp|max:2048',
+//         'employee_id' => 'required|integer'
+
+//     ]);
+// }
+// private function createQueryInput($keys, $request) {
+//     $queryInput = [];
+//     for($i = 0; $i < sizeof($keys); $i++) {
+//         $key = $keys[$i];
+//         $queryInput[$key] = $request[$key];
+//     }
+
+//     return $queryInput;
+// }
 }
 

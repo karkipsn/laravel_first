@@ -22,6 +22,8 @@ class CreateUsersTable extends Migration
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();
+// for oauth2 to enter the api tokens
+            $table->string('api_token', 60)->unique();
         });
         
 }

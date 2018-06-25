@@ -20,6 +20,8 @@
                     
                     <form class="form-horizontal" role="form" method="POST" action="{{ route('tasks.store') }}"enctype="multipart/form-data">{{ csrf_field() }}
 
+                       {{ Form::hidden('type', 1) }}
+
                         <div class="form-group{{ $errors->has('employee_id') ? ' has-error' : '' }}">
                             <label class="col-md-4 control-label">Employee</label>
                             <div class="col-md-6">

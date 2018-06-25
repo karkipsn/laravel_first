@@ -5,20 +5,19 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Department;
+use Validator;
+use App\Http\Controllers\Controller as Controller;
+use App\Http\Controllers\BaseController as BaseController;
 
-class DepartmentController extends Controller
+class DepartmentController extends BaseController
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        // $this->middleware('auth');
-    }
-
     
+    protected $ser;
+
+    public function __construct(BaseController $ser) 
+    { 
+        $this->ser = $ser; 
+    }
 
     
     public function index()
@@ -30,28 +29,51 @@ class DepartmentController extends Controller
     }
 
 
+
     public function create()
     {
         return view('departments/create');
     }
 
 
+
     public function store(Request $request)
     {
-       $this->validateInput($request);
-    //   if(!$valid){
-    //     return back()
-    //     ->with('error', 'Invalid input');
-    // }
 
-    Department::create([
-        'name' => $request['name']
-    ]);
+        $input = $request->all();
 
-    return redirect()->route('/departments')
-    ->with('success','Department created successfully.');
-    
-        // Department::create($request->all());
+        $type = $request->input('type');
+        //$type = ['type' => $request['type']];
+        //dd($type);
+
+        $validator = Validator::make($input, [
+            'name' => 'required|string|max:60|unique:departments',
+
+        ]);
+        if($validator->fails()){
+
+            if($type ==1){
+             return redirect('/departments')
+             ->withErrors($validator)
+             ->withInput();
+         }
+
+         if( $request->wantsJson()){
+
+            return BaseController::sendError('Validation Error.', $validator->errors());
+        }   
+    }
+
+    $department = Department::create($input);
+
+    if($type ==1){
+
+       return redirect('/departments')
+       ->with('success','Department created successfully.');
+   }
+   if($request->wantsJson()){
+       return BaseController::sendResponse($department->toArray(), 'Department created successfully.');
+   }
 }
 
 
@@ -61,16 +83,12 @@ private function validateInput($request) {
     ]);
 }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    
     public function show(Department $department)
     {
         return view('departments.show',compact('department'));
     }
+
     /**
      * Show the form for editing the specified resource.
      *
@@ -95,26 +113,69 @@ private function validateInput($request) {
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    // public function update(Request $request, $id)
+    // {
+
+    //     $department = Department::findOrFail($id);
+
+    //     $this->validateInput($request);
+
+    //     $input = ['name' => $request['name']];
+
+    //     Department::where('id', $id)->update($input);
+
+    //     return redirect()->route('/departments')
+    //     ->with('success','Department updated successfully');
+    // }
+    public function update(Request $request, Department $department)
     {
+        try {
 
-        $department = Department::findOrFail($id);
+            $input = $request->all();
+            $type = $request->input('type');
 
-        $this->validateInput($request);
+            $validator = Validator::make($input, [
+                'name' => 'required|string|max:60|unique:departments',
+            ]);
 
-        // if(!$valid){
-        //     return back()
-        //     ->with('error', 'Invalid input');
-        // }
+            if($validator->fails()){
 
-        $input = ['name' => $request['name']];
+                if($type ==1){
+                 return redirect('/departments')
+                 ->withErrors($validator)
+                 ->withInput();
+             }
 
-        Department::where('id', $id)->update($input);
+             if( $request->wantsJson()){
 
-        return redirect()->route('/departments')
-        ->with('success','Department updated successfully');
-    }
-    
+                return BaseController::sendError('Validation Error.', $validator->errors());
+
+            }   
+        }
+
+        $department->name = $input['name'];
+        $department->save();
+
+
+        if($type ==1){
+
+           return redirect('/departments')
+           ->with('success','Department updated successfully.');
+       }
+       if($request->wantsJson()){
+           return $this->sendResponse($department->toArray(), 'Department updated successfully.');
+
+       }} catch (Exception $e) {
+        if($type ==1){
+
+           return redirect('/departments')
+           ->with('success','Department updated UnSuccessfull.');
+       }
+       if($request->wantsJson()){
+          return $this->sendError('Department delete Unsuccessful.', $e->getMessage());  
+      }
+  }}
+
 
     /**
      * Remove the specified resource from storage.
@@ -124,12 +185,22 @@ private function validateInput($request) {
      */
     public function destroy($id)
     {
-       Department::where('id', $id)->delete();
-        //$department->delete();
+        try{
 
-       return redirect()->route('/departments')
-       ->with('success','Department deleted successfully');
-   }
+         Department::where('id', $id)->delete();
+
+         return redirect('/departments')
+         ->with('success','Department deleted successfully');
+
+     }catch (Exception $e) {
+
+        return redirect('/departments')
+        ->with('Error','Department deleted UnSuccessfull');
+    }
+}
+
+}
+    
 
     /**
      * Search department from database base on some specific constraints
@@ -160,4 +231,4 @@ private function validateInput($request) {
     //     return $query->paginate(5);
     // }
     
-}
+

@@ -221,7 +221,7 @@ class EmployeeController extends BaseController
     if($type ==1){
 
        return redirect('/employees')
-       ->with('success','Employee updated UnSuccessfull.');
+       ->with('Error','Employee updated UnSuccessfull.');
    }
    if($request->wantsJson()){
       return $this->sendError('Employee delete Unsuccessful.', $e->getMessage());  

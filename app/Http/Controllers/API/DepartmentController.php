@@ -5,24 +5,27 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller as Controller;
 use App\Http\Controllers\BaseController as BaseController;
+use App\Http\Controllers\DepartmentController as DController;
 use App\Department;
 use Validator;
 
-class DepartmentController extends BaseController
+class DepartmentController extends DController
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+  
+  protected $dep;
+  public function __construct(DController $dep)
+  {
+     $this->dep = $dep;
+  }
+
+  
     public function index()
     {
-     $departments = Department::all();
+     //  $departments = Department::all();
 
-     return $this->sendResponse($departments->toArray(), 'Departments retrieved successfully.');
+     // // return $this->sendResponse($departments->toArray(), 'Departments retrieved successfully.');
+      return DController::index();
  }
-
- 
 
     /**
      * Store a newly created resource in storage.

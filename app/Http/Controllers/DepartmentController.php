@@ -8,6 +8,7 @@ use App\Department;
 use Validator;
 use App\Http\Controllers\Controller as Controller;
 use App\Http\Controllers\BaseController as BaseController;
+use App\Http\Controllers\API\TestController ;
 
 class DepartmentController extends BaseController
 {
@@ -22,13 +23,20 @@ class DepartmentController extends BaseController
     
     public function index()
     {
-        $departments = Department::latest()->paginate(5);
-
-        return view('departments/index',compact('departments'))
-        ->with('i', (request()->input('page', 1) - 1) * 5);
+         $departments = Department::all();
+    
+         if (\Request::is('api*')) {
+        return BaseController::sendResponse($departments->toArray(), 'Departments retrieved successfully.');
+       
+    }else{
+         return view('departments/index')->with($departments);
+        
     }
 
+   // $departments = Department::latest()->paginate(5);
 
+        
+    }
 
     public function create()
     {

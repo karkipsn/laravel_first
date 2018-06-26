@@ -40,9 +40,9 @@ Route::get('departments',array('before' => 'isJson', 'uses' =>
 Route::get('departments/{department}',array('before' => 'isJson', 'uses' => 
 	'API\DepartmentController@show'));
 Route::post('departments',array('before' => 'isJson', 'uses' => 
-	'DepartmentController@store'));
+	'API\DepartmentController@store'));
 Route::patch('departments/{department}',array('before' => 'isJson', 'uses' => 
-	'DepartmentController@update'));
+	'API\DepartmentController@update'));
 Route::delete('departments/{department}',array('before' => 'isJson', 'uses' => 
 	'API\DepartmentController@destroy'));
 

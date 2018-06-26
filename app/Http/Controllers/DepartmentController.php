@@ -12,7 +12,7 @@ use App\Http\Controllers\API\TestController ;
 
 class DepartmentController extends BaseController
 {
-    
+
     protected $ser;
 
     public function __construct(BaseController $ser) 
@@ -23,86 +23,111 @@ class DepartmentController extends BaseController
     
     public function index()
     {
-         $departments = Department::all();
-    
-         if (\Request::is('api*')) {
+        try{
+       $departments = Department::all();
+
+       if (\Request::is('api*')) {
         return BaseController::sendResponse($departments->toArray(), 'Departments retrieved successfully.');
-       
+
     }else{
-         return view('departments/index')->with($departments);
-        
-    }
-
-   // $departments = Department::latest()->paginate(5);
-
-        
-    }
-
-    public function create()
-    {
-        return view('departments/create');
-    }
-
-
-
-    public function store(Request $request)
-    {
-
-        $input = $request->all();
-
-        $type = $request->input('type');
-        //$type = ['type' => $request['type']];
-        //dd($type);
-
-        $validator = Validator::make($input, [
-            'name' => 'required|string|max:60|unique:departments',
-
-        ]);
-        if($validator->fails()){
-
-            if($type ==1){
-             return redirect('/departments')
-             ->withErrors($validator)
-             ->withInput();
-         }
-
-         if( $request->wantsJson()){
-
-            return BaseController::sendError('Validation Error.', $validator->errors());
-        }   
-    }
-
-    $department = Department::create($input);
-
-    if($type ==1){
-
-       return redirect('/departments')
-       ->with('success','Department created successfully.');
+       return view('departments/index')->with($departments);       
    }
-   if($request->wantsJson()){
-       return BaseController::sendResponse($department->toArray(), 'Department created successfully.');
+   }catch (Exception $e){
+    if(\Request::is('api*')){
+      return $this->sendError('Department retrival Unsuccessful.', $e->getMessage());  }else{
+                 return redirect('/departments')
+         ->with('Error','Department retrival UnSuccessfull.');
+      }
+
    }
+
+}
+
+public function create()
+{
+    return view('departments/create');
 }
 
 
-private function validateInput($request) {
-    $this->validate($request, [
-        'name' => 'required|string|max:60|unique:departments'
+
+public function store(Request $request)
+{
+   try {
+
+    $input = $request->all();
+
+    $validator = Validator::make($input, [
+        'name' => 'required|string|max:60|unique:departments',
+
     ]);
+
+    if($validator->fails()){
+
+        if(\Request::is('api*')){
+
+         return BaseController::sendError('Validation or Data Format Error.', $validator->errors());
+     } else{
+
+       return redirect('/departments')->withErrors($validator)
+       ->withInput();
+   }  
 }
+$department = Department::create($input);
+
+if(\Request::is('api*')){
+ return BaseController::sendResponse($department->toArray(), 'Department created successfully.');
+
+}else{
+ return redirect('/departments')
+ ->with('success','Department created successfully.');
+}       
+   } catch (Exception $e) {
+    
+           if(\Request::is('api*')){
+      return $this->sendError('Department creation Unsuccessful.', $e->getMessage());  }else{
+                 return redirect('/departments')
+         ->with('Error','Department creation UnSuccessfull.');
+      }
+       
+   }
+
+}
+
+   public function show($id)
+   {
+    try {
+
+    $department = Department::find($id);
+
+       if (is_null($department)) {
+
+                 if(\Request::is('api*')){
+
+           return $this->sendDelete('No department with such id exists .');
+      }else{
+
+         return redirect('/departments')
+        ->with('Error','No such department with Id');
+       }    
+          }else{
+             if(\Request::is('api*')){
+
+           return $this->sendResponse($department->toArray(), 'Department retrieved successfully.');
+      }else{
+
+         return view('departments.show',compact('department'));
+       }    
+          }        
+    } catch (Exception $e) {
+        if(\Request::is('api*')){
+      return $this->sendError('Department retrival Unsuccessful.', $e->getMessage());  }else{
+                 return redirect('/departments')
+         ->with('Error','Department retrival UnSuccessfull.');
+      }
+     }
+ }
 
     
-    public function show(Department $department)
-    {
-        return view('departments.show',compact('department'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
 
@@ -114,33 +139,13 @@ private function validateInput($request) {
         return view('departments/edit',compact('department'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    // public function update(Request $request, $id)
-    // {
+    
 
-    //     $department = Department::findOrFail($id);
-
-    //     $this->validateInput($request);
-
-    //     $input = ['name' => $request['name']];
-
-    //     Department::where('id', $id)->update($input);
-
-    //     return redirect()->route('/departments')
-    //     ->with('success','Department updated successfully');
-    // }
     public function update(Request $request, Department $department)
     {
         try {
 
             $input = $request->all();
-            $type = $request->input('type');
 
             $validator = Validator::make($input, [
                 'name' => 'required|string|max:60|unique:departments',
@@ -148,95 +153,81 @@ private function validateInput($request) {
 
             if($validator->fails()){
 
-                if($type ==1){
-                 return redirect('/departments')
-                 ->withErrors($validator)
-                 ->withInput();
-             }
+               if(\Request::is('api*')){
 
-             if( $request->wantsJson()){
+                return BaseController::sendError('Validation Error or Data Format Error.', $validator->errors());
 
-                return BaseController::sendError('Validation Error.', $validator->errors());
-
+            }else{
+                return redirect('/departments')
+                   ->withErrors($validator)
+                   ->withInput();
             }   
         }
 
         $department->name = $input['name'];
         $department->save();
 
+     if(\Request::is('api*')){
+         return $this->sendResponse($department->toArray(), 'Department updated successfully.');
 
-        if($type ==1){
-
-           return redirect('/departments')
-           ->with('success','Department updated successfully.');
-       }
-       if($request->wantsJson()){
-           return $this->sendResponse($department->toArray(), 'Department updated successfully.');
-
-       }} catch (Exception $e) {
-        if($type ==1){
-
-           return redirect('/departments')
-           ->with('success','Department updated UnSuccessfull.');
-       }
-       if($request->wantsJson()){
-          return $this->sendError('Department delete Unsuccessful.', $e->getMessage());  
+     }else{
+                 return redirect('/departments')
+         ->with('success','Department updated successfully.');
+     }
+ } catch (Exception $e) {
+      
+     if(\Request::is('api*')){
+      return $this->sendError('Department delete Unsuccessful.', $e->getMessage());  }else{
+                 return redirect('/departments')
+         ->with('success','Department updated UnSuccessfull.');
       }
-  }}
+}}
 
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         try{
 
-         Department::where('id', $id)->delete();
+         // $department= Department::where('id', $id);
+          $department = Department::find($id);
+
+            if(is_null($department)){
+
+                 if(\Request::is('api*')){
+
+          return $this->sendDelete('No department with such id exists .');
+      }else{
 
          return redirect('/departments')
-         ->with('success','Department deleted successfully');
+        ->with('Error','No such department with Id');
+       }    
+          }
+              
+            $department->delete();
 
-     }catch (Exception $e) {
+           if(\Request::is('api*')){
+
+           return $this->sendResponse($department, 'Department deletion successfully.'); 
+      }else{
+
+           return redirect('/departments')
+           ->with('success','Department deleted successfully');
+       }
+
+       }catch (Exception $e) {
+
+        if(\Request::is('api*')){
+      return $this->sendError('Department delete Unsuccessful.', $e->getMessage());  }else{
 
         return redirect('/departments')
         ->with('Error','Department deleted UnSuccessfull');
     }
+    }
 }
 
 }
-    
 
-    /**
-     * Search department from database base on some specific constraints
-     *
-     * @param  \Illuminate\Http\Request  $request
-     *  @return \Illuminate\Http\Response
-     */
-    // public function search(Request $request) {
-    //     $constraints = [
-    //         'name' => $request['name']
-    //         ];
 
-    //    $departments = $this->doSearchingQuery($constraints);
-    //    return view('department/index', ['departments' => $departments, 'searchingVals' => $constraints]);
-    // }
-
-    // private function doSearchingQuery($constraints) {
-    //     $query = department::query();
-    //     $fields = array_keys($constraints);
-    //     $index = 0;
-    //     foreach ($constraints as $constraint) {
-    //         if ($constraint != null) {
-    //             $query = $query->where( $fields[$index], 'like', '%'.$constraint.'%');
-    //         }
-
-    //         $index++;
-    //     }
-    //     return $query->paginate(5);
-    // }
+  
     
 

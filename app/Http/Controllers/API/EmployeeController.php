@@ -5,28 +5,26 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller as Controller;
 use App\Http\Controllers\BaseController as BaseController;
+use App\Http\Controllers\EmployeeController as EController;
 use App\Employee;
 use App\Department;
 use Validator;
 use Illuminate\Support\Facades\DB;
 
 
-class EmployeeController extends BaseController
+class EmployeeController extends EController
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    
+  protected $dep;
+  public function __construct(EController $dep)
+  {
+     $this->dep = $dep;
+  }
+
     public function index()
     {
-        $employees = DB::table('employees')
-        ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
-        ->select('employees.*', 'departments.name as department_name', 'departments.id as department_id')
-        ->orderBy('employees.id','ASC')
-        ->get();
 
-        return $this->sendResponse(json_decode($employees), 'Employees retrieved successfully.');
+        return EController::index();
     }
 
     
@@ -37,35 +35,10 @@ class EmployeeController extends BaseController
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
-     $input = $request->all();
-         // $department = Department::all();
-
-     $messages = [
-        'name.required' => 'The :attribute is required',
-        'add.required' => 'The :attribute is required',
-        'birthdate.required' => 'The :attribute is required',
-        'date_hired.required' => 'The :attribute is required',
-        'department_id.required' => 'The :attribute is required',
-
-    ];
-
-    $validator = Validator::make($input, [
-        'name' => 'required|string|max:10',
-        'add' => 'required|string|max:120',
-        'birthdate' => 'required|date',
-        'date_hired' => 'required|date',
-        'department_id' => 'required|exists:departments,id',
-
-    ], $messages);
-
-    if($validator->fails()){
-         //return new APIErrorValidationResponse($request, $validator);
-        return $this->sendError('Validation Error or Invalid Json Format.', $validator->errors());       
-    }
-    $employee = Employee::create($input);
-    return $this->sendResponse($employee->toArray(), 'Employee created successfully.');
-}
+    {    
+        return EController::store($request);
+            
+        }
 
     /**
      * Display the specified resource.

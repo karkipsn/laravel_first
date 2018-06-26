@@ -9,7 +9,6 @@ use Session;
 use App\Employee;
 use App\Department;
 use Datatables;
-
 use Validator;
 use App\Http\Controllers\Controller as Controller;
 use App\Http\Controllers\BaseController as BaseController;
@@ -24,12 +23,28 @@ class EmployeeController extends BaseController
 
  public function index()
  {
-    $employees = DB::table('employees')
+      try{
+       $employees = DB::table('employees')
     ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
     ->select('employees.*', 'departments.name as department_name', 'departments.id as department_id')->paginate(5);
-    // ->paginate(5);
 
-    return view('employees/index', ['employees' => $employees]);
+
+       if (\Request::is('api*')) {
+        return BaseController::sendResponse($employees->toArray(), 'Employees retrieved successfully.');
+
+    }else{
+        return view('employees/index', ['employees' => $employees]);      
+   }
+
+   }catch (Exception $e){
+
+    if(\Request::is('api*')){
+      return $this->sendError('Employees retrival Unsuccessful.', $e->getMessage());  }else{
+                 return redirect('/departments')
+         ->with('Error','Employees retrival UnSuccessfull.');
+      }
+
+   } 
 }
 
     /**
@@ -60,38 +75,47 @@ class EmployeeController extends BaseController
      */
     public function store(Request $request)
     {
-        $input = $request->all();
+        try {
 
-        $validator = Validator::make($input, [
-            'name' => 'required|string|max:10',
-            'add' => 'required|string|max:120',
-            'birthdate' => 'required|date',
-            'date_hired' => 'required|date',
-            'department_id' => 'required|exists:departments,id',
+     $input = $request->all();
+    
+    $validator = Validator::make($input, [
+        'name' => 'required|string|max:10',
+        'add' => 'required|string|max:120',
+        'birthdate' => 'required|date',
+        'date_hired' => 'required|date',
+        'department_id' => 'required|exists:departments,id',
 
-        ]);
-        if($validator->fails()){
+    ]);
 
-            if($type ==1){
-             return redirect('/employees')
-             ->withErrors($validator)
-             ->withInput();
-         }
+    if($validator->fails()){
 
-         if( $request->wantsJson()){
-            return $this->sendError('Validation Error.', $validator->errors());
-        }   
-    }
+        if(\Request::is('api*')){
+
+         return BaseController::sendError('Validation or Data Format Error.', $validator->errors());
+     } else{
+
+       return redirect('/employees')->withErrors($validator)
+       ->withInput();
+   }  
+}
     $employee = Employee::create($input);
 
-    if($type ==1){
+  if(\Request::is('api*')){
+ return BaseController::sendResponse($employee->toArray(), 'Employee created successfully.');
 
-       return redirect('/employees')
-       ->with('success','Employee created successfully.');
-   }
-   if($request->wantsJson()){
-       return $this->sendResponse($employee->toArray(), 'Employee created successfully.');
-   }
+}else{
+ return redirect('/employees')
+ ->with('success','Employee created successfully.');
+}            
+        } catch (Exception $e) {
+
+              if(\Request::is('api*')){
+      return $this->sendError('Employee creation Unsuccessful.', $e->getMessage());  }else{
+                 return redirect('/departments')
+         ->with('Error','Employee creation UnSuccessfull.');
+      }
+     }
 }
 
     /**
@@ -102,7 +126,44 @@ class EmployeeController extends BaseController
      */
     public function show(Employee $employee)
     {
-        //
+        
+    $employee = Employee::find($id);
+
+       if (is_null($department)) {
+
+                 if(\Request::is('api*')){
+
+           return $this->sendDelete('No department with such id exists .');
+      }else{
+
+         return redirect('/departments')
+        ->with('Error','No such department with Id');
+       }    
+          }else{
+            try {
+
+            $employee = DB::table('employees')
+        ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
+        ->select('employees.*', 'departments.name as department_name', 'departments.id as department_id' )
+        ->where('employees.id', '=', $id)
+        ->get();
+
+             if(\Request::is('api*')){
+
+           return $this->sendResponse($department->toArray(), 'Department retrieved successfully.');
+      }else{
+
+         return view('departments.show',compact('department'));
+       }    
+          }        
+     catch (Exception $e) {
+        if(\Request::is('api*')){
+      return $this->sendError('Department retrival Unsuccessful.', $e->getMessage());  }else{
+                 return redirect('/departments')
+         ->with('Error','Department retrival UnSuccessfull.');
+      }
+  }
+     }
     }
 
     public function import(Request $request){

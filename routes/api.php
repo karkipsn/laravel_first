@@ -62,7 +62,7 @@ Route::get('tasks',array('before' => 'isJson',
 Route::get('tasks/{task}',array('before' => 'isJson', 'uses' => 'API\TaskController@show'));
 Route::post('tasks',array('before' => 'isJson', 'uses' =>
  'API\TaskController@store'));
-Route::patch('tasks/{task}',array('before' => 'isJson', 'uses' => 'API\TaskController@update'));
+Route::patch('tasks/{task}',array('uses' => 'API\TaskController@update'));
 Route::delete('tasks/{task}',array('before' => 'isJson', 'uses' => 'API\TaskController@destroy'));
 
 

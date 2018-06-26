@@ -78,10 +78,8 @@
 
                         <!-- <div class="form-group{{ $errors->has('attachment') ? ' has-error' : '' }}">
                             <label for="attachment" class="col-md-4 control-label">Attachment</label>
-
                             <div class="col-md-6">
                                 <input id="attachment" type="file" class="form-control" name="attachment" value="{{ old('attachment') }}" required>
-
                                 @if ($errors->has('attachment'))
                                 <span class="help-block">
                                     <strong>{{ $errors->first('attachment') }}</strong>

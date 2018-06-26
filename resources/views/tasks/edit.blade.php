@@ -8,8 +8,8 @@
                 <div class="panel-heading">Update EmployeeTask</div>
                 <div class="panel-body">
 
-                 @if ($errors->any())
-                 <div class="alert alert-danger">
+                   @if ($errors->any())
+                   <div class="alert alert-danger">
                     <ul>
                         @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -17,11 +17,13 @@
                     </ul>
                 </div>
                 @endif
-                <form class="form-horizontal" role="form" method="POST" action="{{ route('tasks.update', ['id' => $tasks->id]) }}">
+
+                <form class="form-horizontal" role="form" method="POST" action="{{ route('tasks.update', ['id' => $task->id]) }}" enctype="multipart/form-data">
                     <input type="hidden" name="_method" value="PATCH">
                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                     
                     {{ Form::hidden('type', 1) }}
+
 
                     <div class="form-group{{ $errors->has('employee_id') ? ' has-error' : '' }}">
                         <label class="col-md-4 control-label">Employee</label>

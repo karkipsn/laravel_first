@@ -15,10 +15,10 @@ use App\Http\Controllers\BaseController as BaseController;
 class TaskController extends BaseController
 {
 
-   public function __construct()
-   {
+ public function __construct()
+ {
      // $this->middleware('auth');
-   }
+ }
     /**
      * Display a listing of the resource.
      *
@@ -56,41 +56,41 @@ class TaskController extends BaseController
     public function store(Request $request)
     {
 
-       $input = $request->all();
+     $input = $request->all();
 
-       $type = $request->input('type');
+     $type = $request->input('type');
 
-       $validator = Validator::make($input, [
-         'title' => 'required|string|max:60',
-         'description' => 'required|string|max:120',
-         'deadline' => 'required|date',
-         'attachment' => 'required|file|image|mimes:jpeg,png,gif,webp|max:2048',
-         'employee_id' => 'required|exists:employees,id'
+     $validator = Validator::make($input, [
+       'title' => 'required|string|max:60',
+       'description' => 'required|string|max:120',
+       'deadline' => 'required|date',
+       'attachment' => 'required|file|image|mimes:jpeg,png,gif,webp|max:2048',
+       'employee_id' => 'required|exists:employees,id'
 
-     ]);
-       $path = $request->file('attachment')->store('avatars');
-       $input['attachment'] = $path;
+   ]);
+     $path = $request->file('attachment')->store('avatars');
+     $input['attachment'] = $path;
 
-       if($validator->fails()){
+     if($validator->fails()){
 
         if($type ==1){
-         return redirect('/tasks')
-         ->withErrors($validator)
-         ->withInput();
-     }
+           return redirect('/tasks')
+           ->withErrors($validator)
+           ->withInput();
+       }
 
-     if( $request->wantsJson()){
+       if( $request->wantsJson()){
         return $this->sendError('Validation Error or Format Error.', $validator->errors());
     }   
 }
 $task = Task::create($input);
 if($type ==1){
 
-   return redirect('/tasks')
-   ->with('success','Task created successfully.');
+ return redirect('/tasks')
+ ->with('success','Task created successfully.');
 }
 if($request->wantsJson()){
-   return $this->sendResponse($task->toArray(), 'Task created successfully.');
+ return $this->sendResponse($task->toArray(), 'Task created successfully.');
 }
 }
 
@@ -115,17 +115,12 @@ if($request->wantsJson()){
     public function edit($id)
     {
 
-       $task = Employee::find($id);
-        // Redirect to state list if updating state wasn't existed
-    //    if ($task == null || count($task) == 0) {
-    //     return redirect()->intended('/tasks');
-    // }
+     $task = Employee::find($id);
+     $employees = Employee::all();
 
-       $employees = Employee::all();
-
-       return view('tasks/edit', ['task' => $task, 
+     return view('tasks/edit', ['task' => $task, 
         'employees' => $employees]);
-   }
+ }
 
     /**
      * Update the specified resource in storage.
@@ -137,7 +132,7 @@ if($request->wantsJson()){
 
     public function update(Request $request, Task $task)
     {
-
+       try{
         $input = $request->all();
         $type = $request->input('type');
 
@@ -145,18 +140,19 @@ if($request->wantsJson()){
             'title' => 'required|string|max:60',
             'description' => 'required|string|max:120',
             'deadline' => 'required|date',
-            'attachment' => 'required|file|image|mimes:jpeg,png,gif,webp|max:2048',
+            'attachment' => 'required|mimes:jpeg,PNG,gif,webp|max:2048',
             'employee_id' => 'required|exists:employees,id'
         ]);
 
         if($validator->fails()){
-            if($type ==1){
-             return redirect('/tasks')
-             ->withErrors($validator)
-             ->withInput();
-         }
 
-         if( $request->wantsJson()){
+            if($type ==1){
+               return redirect('/tasks')
+               ->withErrors($validator)
+               ->withInput();
+           }
+
+           if( $request->wantsJson()){
             return $this->sendError('Validation Error or Format Error.', $validator->errors());
         }   
     }
@@ -164,29 +160,34 @@ if($request->wantsJson()){
     $task->title = $input['title'];
     $task->description = $input['description'];
     $task->deadline = $input['deadline'];
-
     $task->employee_id = $input['employee_id'];
 
     if ($request->file('attachment')) {
+
       $path = $request->file('attachment')->store('avatars');
       $input['attachment'] = $path;
-      $task->attachment = $input['attachment'];
-  }
+      $task->attachment = $input['attachment']; }
 
   $task->save();
 
   if($type ==1){
 
-   return redirect('/task')
-   ->with('success','Task created successfully.');
+     return redirect('/task')
+     ->with('success','Task created successfully.');
+ }
+ if($request->wantsJson()){
+     return BaseController::sendResponse($task->toArray(), 'Task updated successfully.');
+ }}
+ catch (Exception $e) {
+    if($type ==1){
+
+       return redirect('/tasks')
+       ->with('success','Task updated UnSuccessfull.');
+   }
+   if($request->wantsJson()){
+      return $this->sendError('Task delete Unsuccessful.', $e->getMessage());  
+  }
 }
-if($request->wantsJson()){
-   return BaseController::sendResponse($task->toArray(), 'Task created successfully.');
-}
-
-
-return $this->sendResponse($task->toArray(), 'Task updated successfully.');
-
 }
 
     /**
@@ -197,16 +198,16 @@ return $this->sendResponse($task->toArray(), 'Task updated successfully.');
      */
     public function destroy($id)
     {
-       $del =Task::where('id', $id)->delete();
-       if($del == null){
+     $del =Task::where('id', $id)->delete();
+     if($del == null){
 
         return redirect()->intended('/tasks')
         ->with('Error','Task deletion UnSuccessfull');;
-      }
-   
+    }
 
-return redirect()->intended('/tasks')
-->with('success','Task deleted successfully');;
+
+    return redirect()->intended('/tasks')
+    ->with('success','Task deleted successfully');;
 }
 
 // private function validateInput($request) {

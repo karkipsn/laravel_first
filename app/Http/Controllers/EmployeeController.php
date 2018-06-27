@@ -13,39 +13,47 @@ use Validator;
 use App\Http\Controllers\Controller as Controller;
 use App\Http\Controllers\BaseController as BaseController;
 
+
 class EmployeeController extends BaseController
 {
- public function __construct()
- {
+
+
+   public function __construct()
+   {
     // $this->middleware('auth');
- }
-
-
- public function index()
- {
-      try{
-       $employees = DB::table('employees')
-    ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
-    ->select('employees.*', 'departments.name as department_name', 'departments.id as department_id')->paginate(5);
-
-
-       if (\Request::is('api*')) {
-        return BaseController::sendResponse($employees->toArray(), 'Employees retrieved successfully.');
-
-    }else{
-        return view('employees/index', ['employees' => $employees]);      
    }
 
-   }catch (Exception $e){
 
-    if(\Request::is('api*')){
-      return $this->sendError('Employees retrival Unsuccessful.', $e->getMessage());  }else{
-                 return redirect('/departments')
-         ->with('Error','Employees retrival UnSuccessfull.');
-      }
+   public function index()
+   {
+      try{
 
-   } 
-}
+         $employees = DB::table('employees')
+         ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
+         ->select('employees.*', 'departments.name as department_name', 'departments.id as department_id')->paginate(5);
+
+
+         if (\Request::is('api*')) {
+
+             return BaseController::sendResponse($employees->toArray(), 'Employees retrieved successfully.');
+
+         }else{
+
+            return view('employees/index', ['employees' => $employees]);      
+        }
+
+    }catch (Exception $e){
+
+        if(\Request::is('api*')){
+
+           return $this->sendError('Employees retrival Unsuccessful.', $e->getMessage());  }
+           else{
+               return redirect('/employees')
+               ->with('Error','Employees retrival UnSuccessfull.');
+           }
+
+       } 
+   }
 
     /**
      * Show the form for creating a new resource.
@@ -54,14 +62,14 @@ class EmployeeController extends BaseController
      */
     public function create()
     {
-       $departments = Department::all();
+     $departments = Department::all();
 
-       return view('employees/create', [
+     return view('employees/create', [
         'departments' => $departments]);
-   }
+ }
 
 
-   public function add_import(){
+ public function add_import(){
 
     return view ('employees/add_import');
 
@@ -77,45 +85,45 @@ class EmployeeController extends BaseController
     {
         try {
 
-     $input = $request->all();
-    
-    $validator = Validator::make($input, [
-        'name' => 'required|string|max:10',
-        'add' => 'required|string|max:120',
-        'birthdate' => 'required|date',
-        'date_hired' => 'required|date',
-        'department_id' => 'required|exists:departments,id',
+           $input = $request->all();
 
-    ]);
+           $validator = Validator::make($input, [
+            'name' => 'required|string|max:10',
+            'add' => 'required|string|max:120',
+            'birthdate' => 'required|date',
+            'date_hired' => 'required|date',
+            'department_id' => 'required|exists:departments,id',
 
-    if($validator->fails()){
+        ]);
 
-        if(\Request::is('api*')){
+           if($validator->fails()){
 
-         return BaseController::sendError('Validation or Data Format Error.', $validator->errors());
-     } else{
+            if(\Request::is('api*')){
 
-       return redirect('/employees')->withErrors($validator)
-       ->withInput();
-   }  
-}
-    $employee = Employee::create($input);
+               return BaseController::sendError('Validation or Data Format Error.', $validator->errors());
+           } else{
+
+             return redirect('/employees')->withErrors($validator)
+             ->withInput();
+         }  
+     }
+     $employee = Employee::create($input);
+
+     if(\Request::is('api*')){
+       return BaseController::sendResponse($employee->toArray(), 'Employee created successfully.');
+
+   }else{
+       return redirect('/employees')
+       ->with('success','Employee created successfully.');
+   }            
+} catch (Exception $e) {
 
   if(\Request::is('api*')){
- return BaseController::sendResponse($employee->toArray(), 'Employee created successfully.');
-
-}else{
- return redirect('/employees')
- ->with('success','Employee created successfully.');
-}            
-        } catch (Exception $e) {
-
-              if(\Request::is('api*')){
       return $this->sendError('Employee creation Unsuccessful.', $e->getMessage());  }else{
-                 return redirect('/departments')
-         ->with('Error','Employee creation UnSuccessfull.');
-      }
-     }
+       return redirect('/employees')
+       ->with('Error','Employee creation UnSuccessfull.');
+   }
+}
 }
 
     /**
@@ -124,83 +132,89 @@ class EmployeeController extends BaseController
      * @param  \App\Employee  $employee
      * @return \Illuminate\Http\Response
      */
-    public function show(Employee $employee)
+    public function show($id)
     {
-        
-    $employee = Employee::find($id);
 
-       if (is_null($department)) {
+        $employee = Employee::find($id);
 
-                 if(\Request::is('api*')){
+        if (is_null($employee)) {
 
-           return $this->sendDelete('No department with such id exists .');
-      }else{
+           if(\Request::is('api*')){
 
-         return redirect('/departments')
-        ->with('Error','No such department with Id');
+             return $this->sendDelete('No employee with such id exists .');
+         }
+         else{
+
+           return redirect('/employees')
+           ->with('Error','No such employee with Id');
        }    
-          }else{
-            try {
+   }
+   else{
 
-            $employee = DB::table('employees')
+    try {
+
+        $employee = DB::table('employees')
         ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
         ->select('employees.*', 'departments.name as department_name', 'departments.id as department_id' )
         ->where('employees.id', '=', $id)
         ->get();
 
-             if(\Request::is('api*')){
-
-           return $this->sendResponse($department->toArray(), 'Department retrieved successfully.');
-      }else{
-
-         return view('departments.show',compact('department'));
-       }    
-          }        
-     catch (Exception $e) {
         if(\Request::is('api*')){
-      return $this->sendError('Department retrival Unsuccessful.', $e->getMessage());  }else{
-                 return redirect('/departments')
-         ->with('Error','Department retrival UnSuccessfull.');
-      }
-  }
-     }
-    }
 
-    public function import(Request $request){
+         return $this->sendResponse($employee->toArray(), 'Department retrieved successfully.');
+     }else{
+
+       return view('employees.show',compact('employee'));
+   }    
+}        
+catch (Exception $e) {
+
+    if(\Request::is('api*')){
+
+      return $this->sendError('Department retrival Unsuccessful.', $e->getMessage());  }
+      else{
+       return redirect('/employees')
+       ->with('Error','Employee retrival UnSuccessfull.');
+   }
+}
+}
+}
+
+public function import(Request $request){
          //validate the xls file
-        $this->validate($request, array(
-            'file'      => 'required'
-        ));
+    $this->validate($request, array(
+        'file'      => 'required'
+    ));
 
-        if($request->hasFile('file')){
-            $extension = File::extension($request->file->getClientOriginalName());
-            if ($extension == "xlsx" || $extension == "xls" || $extension == "csv") {
+    if($request->hasFile('file')){
+        $extension = File::extension($request->file->getClientOriginalName());
+        if ($extension == "xlsx" || $extension == "xls" || $extension == "csv") {
 
-                $path = $request->file->getRealPath();
-                $data = Excel::load($path, function($reader) {
-                })->get();
-                if(!empty($data) && $data->count()){
+            $path = $request->file->getRealPath();
+            $data = Excel::load($path, function($reader) {
+            })->get();
+            if(!empty($data) && $data->count()){
 
-                    foreach ($data as $key => $value) {
-                        $insert[] = [
-                            'name' => $value->name,
-                            'add' => $value->add,
-                            'birthdate' => $value->birthdate,
-                            'date_hired' => $value->date_hired,
-                            'department_id' => $value->department_id,
-                        ];
-                    }
-
-                    if(!empty($insert)){
-
-                        $insertData = DB::table('employees')->insert($insert); 
-                    }
-                    return redirect()->intended('/employees');
+                foreach ($data as $key => $value) {
+                    $insert[] = [
+                        'name' => $value->name,
+                        'add' => $value->add,
+                        'birthdate' => $value->birthdate,
+                        'date_hired' => $value->date_hired,
+                        'department_id' => $value->department_id,
+                    ];
                 }
 
+                if(!empty($insert)){
+
+                    $insertData = DB::table('employees')->insert($insert); 
+                }
+                return redirect()->intended('/employees');
             }
+
         }
     }
+}
 
     /**
      * Show the form for editing the specified resource.
@@ -210,14 +224,14 @@ class EmployeeController extends BaseController
      */
     public function edit($id)
     {
-       $employee = Employee::find($id);
+     $employee = Employee::find($id);
 
 
-       $departments = Department::all();
+     $departments = Department::all();
 
-       return view('employees/edit', ['employee' => $employee, 
+     return view('employees/edit', ['employee' => $employee, 
         'departments' => $departments]);
-   }
+ }
 
     /**
      * Update the specified resource in storage.
@@ -226,68 +240,72 @@ class EmployeeController extends BaseController
      * @param  \App\Employee  $employee
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Employee $employee)
     {
-        try {
+        $id = Employee::findOrFail($employee);
 
-            $input = Employee::findOrFail($id);
+        if (is_null($id)) {
 
-            $type = $request->input('type');
+           if(\Request::is('api*')){
 
-            if($input == null){
-        return redirect()->intended('/employees')
-        ->with('Error','No Such Employees Exists');
-    }
-
-            $validator = Validator::make($input, [
-                'name' => 'required|string|max:10',
-                'add' => 'required|string|max:120',
-                'birthdate' => 'required|date',
-                'date_hired' => 'required|date',
-                'department_id' => 'required|exists:departments,id',
-            ]);
-
-            if($validator->fails()){
-
-                if($type ==1){
-                 return redirect('/employees')
-                 ->withErrors($validator)
-                 ->withInput();
-             }
-
-             if( $request->wantsJson()){
-
-                return $this->sendError('Validation Error.', $validator->errors());
-
-            }   
-        }
-
-        $employee->name = $input['name'];
-        $employee->add = $input['add'];
-        $employee->birthdate = $input['birthdate'];
-        $employee->date_hired = $input['date_hired'];
-        $employee->department_id = $input['department_id'];
-        $employee->save();
-
-        if($type ==1){
+             return $this->sendDelete('No employee with such id exists .');
+         }
+         else{
 
            return redirect('/employees')
-           ->with('success','Employee updated successfully.');
-       }
-       if($request->wantsJson()){
-           return $this->sendResponse($employee->toArray(), 'Employee updated successfully.');
-
-       }
-   } catch (Exception $e) {
-    if($type ==1){
-
-       return redirect('/employees')
-       ->with('Error','Employee updated UnSuccessfull.');
+           ->with('Error','No such employee with Id');
+       }    
    }
-   if($request->wantsJson()){
-      return $this->sendError('Employee delete Unsuccessful.', $e->getMessage());  
-  }
-}}
+   else{
+    try {
+        $input = $request->all();
+
+        $validator = Validator::make($input, [
+            'name' => 'required|string|max:10',
+            'add' => 'required|string|max:120',
+            'birthdate' => 'required|date',
+            'date_hired' => 'required|date',
+            'department_id' => 'required|exists:departments,id',
+        ]);
+
+        if($validator->fails()){
+
+            if(\Request::is('api*')){
+
+               return BaseController::sendError('Validation or Data Format Error.', $validator->errors());
+           } else{
+
+             return redirect('/employees')->withErrors($validator)
+             ->withInput();
+         }  
+     }
+
+     $employee->name = $input['name'];
+     $employee->add = $input['add'];
+     $employee->birthdate = $input['birthdate'];
+     $employee->date_hired = $input['date_hired'];
+     $employee->department_id = $input['department_id'];
+     $employee->save();
+
+     if(\Request::is('api*')){
+
+         return $this->sendResponse($employee->toArray(), 'Employee updated successfully.');
+     }else{
+
+       return view('employees.show',compact('employee'));
+   } 
+
+} catch (Exception $e) {
+     if(\Request::is('api*')){
+
+      return $this->sendError('Employee updation Unsuccessful.', $e->getMessage());  }
+      else{
+       return redirect('/employees')
+       ->with('Error','Employee retrival UnSuccessfull.');
+   }
+}
+}
+}
 
     /**
      * Remove the specified resource from storage.
@@ -295,20 +313,49 @@ class EmployeeController extends BaseController
      * @param  \App\Employee  $employee
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
-       $del= Employee::where('id', $id)->first();
+   public function destroy($id)
+{
 
-       if($del == null){
-        return redirect()->intended('/employees')
-        ->with('Error','No Such Employees Exists');
-    }
+         // $department= Employee::where('id', $id);
+      $employee = Employee::find($id);
 
-    $del->delete();
-    
-    return redirect()->intended('/employees')
-    ->with('success','Employee deleted successfully');
+      if(is_null($employee)){
+
+         if(\Request::is('api*')){
+
+          return $this->sendDelete('No employee with such id exists .');
+      }else{
+
+         return redirect('/employees')
+         ->with('Error','No such department with Id');
+     }    
+ }
+     try{
+
+ $employee->delete();
+
+ if(\Request::is('api*')){
+
+   return $this->sendResponse($employee, 'Employee deletion successfully.'); 
+}else{
+
+   return redirect('/employees')
+   ->with('success','Employee deleted successfully');
 }
+
+}catch (Exception $e) {
+
+    if(\Request::is('api*')){
+      return $this->sendError('Employee delete Unsuccessful.', $e->getMessage());  }else{
+
+        return redirect('/employees')
+        ->with('Error','Employee deleted UnSuccessfull');
+    }
+}
+}
+
+}
+
 
 // private function validateInput($request) {
 //     $this->validate($request, [
@@ -331,4 +378,4 @@ class EmployeeController extends BaseController
 
 //     return $queryInput;
 // }
-}
+

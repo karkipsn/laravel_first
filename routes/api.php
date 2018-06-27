@@ -18,20 +18,33 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 // for passport register 
-Route::post('register',array('before' => 'isJson', 'uses' => 'API\RegisterController@register'));
+Route::post('register',array('before' => 'isJson', 'uses' => 'API\AuthController@register'));
+
+Route::group([
+    'prefix' => 'auth'
+], function () {
+    Route::post('login', 'API\AuthController@login');
+  
+    Route::group([
+      'middleware' => 'auth:api'
+    ], function() {
+        Route::get('logout', 'API\AuthController@logout');
+    });
+});
+
 
 
 //Route::resource('users','API\HomeController');
-Route::get('users',array('before' => 'isJson', 'uses' => 
-	'API\HomeController@index'));
-Route::post('users',array('before' => 'isJson', 'uses' => 
-	'API\HomeController@store'));
-Route::get('users/{user}',array('before' => 'isJson', 'uses' => 
-	'API\HomeController@show'));
-Route::patch('users/{user}',array('before' => 'isJson', 'uses' => 
-	'API\HomeController@update'));
-Route::delete('users/{user}',array('before' => 'isJson', 'uses' => 
-	'API\HomeController@destroy'));
+// Route::get('users',array('before' => 'isJson', 'uses' => 
+// 	'API\HomeController@index'));
+// Route::post('users',array('before' => 'isJson', 'uses' => 
+// 	'API\HomeController@store'));
+// Route::get('users/{user}',array('before' => 'isJson', 'uses' => 
+// 	'API\HomeController@show'));
+// Route::patch('users/{user}',array('before' => 'isJson', 'uses' => 
+// 	'API\HomeController@update'));
+// Route::delete('users/{user}',array('before' => 'isJson', 'uses' => 
+// 	'API\HomeController@destroy'));
 
 // Route::resource('departments','API\DepartmentController');
 
@@ -66,14 +79,8 @@ Route::patch('tasks/{task}',array('uses' => 'API\TaskController@update'));
 Route::delete('tasks/{task}',array('before' => 'isJson', 'uses' => 'API\TaskController@destroy'));
 
 
-Route::group([
-    'prefix' => 'auth'
-], function () {
-    Route::post('login', 'API\AuthController@login');
-  
-    Route::group([
-      'middleware' => 'auth:api'
-    ], function() {
-        Route::get('logout', 'API\AuthController@logout');
-    });
-});
+
+
+// Route::group(['namespace' => 'api'], function () {
+//     Route::get('/login', 'API\HomeController@login');
+// });

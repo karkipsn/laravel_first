@@ -26,12 +26,34 @@ class TaskController extends BaseController
      */
     public function index()
     {
-        $tasks = DB::table('tasks')
+        try{
+
+         $tasks = DB::table('tasks')
         ->leftJoin('employees', 'tasks.employee_id', '=', 'employees.id')
         ->select ('tasks.*','employees.name as employee_name','employees.id as employee_id')
         ->paginate(5);
 
-        return view('tasks/index', ['tasks' => $tasks]);
+
+         if (\Request::is('api*')) {
+
+             return BaseController::sendResponse($tasks->toArray(), 'Tasks retrieved successfully.');
+
+         }else{
+
+                    return view('tasks/index', ['tasks' => $tasks]);      
+        }
+
+    }catch (Exception $e){
+
+        if(\Request::is('api*')){
+
+           return $this->sendError('Tasks retrival Unsuccessful.', $e->getMessage());  }
+           else{
+               return redirect('/tasks')
+               ->with('Error','Tasks retrival UnSuccessfull.');
+           }
+
+       } 
     }
 
     /**
@@ -55,10 +77,9 @@ class TaskController extends BaseController
      */
     public function store(Request $request)
     {
+      try{
 
      $input = $request->all();
-
-     $type = $request->input('type');
 
      $validator = Validator::make($input, [
        'title' => 'required|string|max:60',
@@ -68,31 +89,46 @@ class TaskController extends BaseController
        'employee_id' => 'required|exists:employees,id'
 
    ]);
-     $path = $request->file('attachment')->store('avatars');
-     $input['attachment'] = $path;
-
+     
      if($validator->fails()){
 
-        if($type ==1){
-           return redirect('/tasks')
-           ->withErrors($validator)
-           ->withInput();
-       }
+            if(\Request::is('api*')){
 
-       if( $request->wantsJson()){
-        return $this->sendError('Validation Error or Format Error.', $validator->errors());
-    }   
-}
-$task = Task::create($input);
-if($type ==1){
+               return BaseController::sendError('Validation or Data Format Error.', $validator->errors());
+           } else{
 
- return redirect('/tasks')
- ->with('success','Task created successfully.');
-}
-if($request->wantsJson()){
- return $this->sendResponse($task->toArray(), 'Task created successfully.');
-}
-}
+             return redirect('/tasks')->withErrors($validator)
+             ->withInput();
+         }  
+     }
+         
+         $path = $request->file('attachment')->store('avatars');
+           $input['attachment'] = $path;
+
+          $task = Task::create($input);
+ 
+         if(\Request::is('api*')){
+            
+             return BaseController::sendResponse($task->toArray(), 'Task created successfully.');
+
+        }else{
+
+              return redirect('/tasks')
+               ->with('success','Task created successfully.');
+          } 
+      }
+      catch (Exception $e) {
+
+          if(\Request::is('api*')){
+                    return $this->sendError('Task creation Unsuccessful.', $e->getMessage());  }
+
+               else{
+
+                   return redirect('/tasks')
+                      ->with('Error','Task creation UnSuccessfull.');
+                        }
+               }
+        }
 
 
 
@@ -103,7 +139,51 @@ if($request->wantsJson()){
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    {//
+    {
+        $task = Task::find($id);
+
+        if (is_null($task)) {
+
+           if(\Request::is('api*')){
+
+             return $this->sendDelete('No task with such id exists .');
+         }
+         else{
+
+           return redirect('/employees')
+           ->with('Error','No such task with Id');
+       }    
+   }
+   else{
+
+    try {
+
+         $task = DB::table('tasks')
+       ->leftJoin('employees', 'tasks.employee_id', '=', 'employees.id')
+       ->select ('tasks.*','employees.name as employee_name','employees.id as employee_id')
+       ->where('employees.id', '=', $id)
+        ->get();
+
+        if(\Request::is('api*')){
+
+         return $this->sendResponse($task->toArray(), 'Task retrieved successfully.');
+     }else{
+
+       return view('tasks.show',compact('task'));
+   }    
+}        
+catch (Exception $e) {
+
+    if(\Request::is('api*')){
+
+      return $this->sendError('Task retrival Unsuccessful.', $e->getMessage());  }
+      else{
+       return redirect('/tasks')
+       ->with('Error','Task retrival UnSuccessfull.');
+   }
+}
+}
+
     }
 
     /**
@@ -132,9 +212,25 @@ if($request->wantsJson()){
 
     public function update(Request $request, Task $task)
     {
+
+        $id = Task::findOrFail($task);
+
+        if (is_null($id)) {
+
+           if(\Request::is('api*')){
+
+             return $this->sendDelete('No task with such id exists .');
+         }
+         else{
+
+           return redirect('/tasks')
+           ->with('Error','No such task with Id');
+       }    
+   }
+   else{
+
        try{
         $input = $request->all();
-        $type = $request->input('type');
 
         $validator = Validator::make($input, [
             'title' => 'required|string|max:60',
@@ -144,18 +240,17 @@ if($request->wantsJson()){
             'employee_id' => 'required|exists:employees,id'
         ]);
 
-        if($validator->fails()){
+         if($validator->fails()){
 
-            if($type ==1){
-               return redirect('/tasks')
-               ->withErrors($validator)
-               ->withInput();
-           }
+            if(\Request::is('api*')){
 
-           if( $request->wantsJson()){
-            return $this->sendError('Validation Error or Format Error.', $validator->errors());
-        }   
-    }
+               return BaseController::sendError('Validation or Data Format Error.', $validator->errors());
+           } else{
+
+             return redirect('/tasks')->withErrors($validator)
+             ->withInput();
+         }  
+     }
 
     $task->title = $input['title'];
     $task->description = $input['description'];
@@ -168,27 +263,26 @@ if($request->wantsJson()){
       $input['attachment'] = $path;
       $task->attachment = $input['attachment']; }
 
-  $task->save();
+    $task->save();
 
-  if($type ==1){
+  if(\Request::is('api*')){
+     return $this->sendResponse($task->toArray(), 'Task updated successfully.');
 
-     return redirect('/task')
-     ->with('success','Task created successfully.');
- }
- if($request->wantsJson()){
-     return BaseController::sendResponse($task->toArray(), 'Task updated successfully.');
+ }else{
+     return redirect('/tasks')
+     ->with('success',' Task updated successfully.');
  }}
  catch (Exception $e) {
-    if($type ==1){
-
-       return redirect('/tasks')
-       ->with('success','Task updated UnSuccessfull.');
-   }
-   if($request->wantsJson()){
-      return $this->sendError('Task delete Unsuccessful.', $e->getMessage());  
+    
+   if(\Request::is('api*')){
+      return $this->sendError('Task updation Unsuccessful.', $e->getMessage());  
+  }else{
+        return redirect('/tasks')
+       ->with('success','Task update UnSuccessfull.');
   }
 }
-}
+
+} }
 
     /**
      * Remove the specified resource from storage.
@@ -198,16 +292,42 @@ if($request->wantsJson()){
      */
     public function destroy($id)
     {
-     $del =Task::where('id', $id)->delete();
-     if($del == null){
+        // $department= Employee::where('id', $id);
+      $task = Task::find($id);
 
-        return redirect()->intended('/tasks')
-        ->with('Error','Task deletion UnSuccessfull');;
+      if(is_null($task)){
+
+         if(\Request::is('api*')){
+
+          return $this->sendDelete('No task with such id exists .');
+      }else{
+
+         return redirect('/tasks')
+         ->with('Error','No such tasks asssociated with this Id');
+     }    
+ }
+     try{
+
+ $task->delete();
+
+ if(\Request::is('api*')){
+
+   return $this->sendResponse($task, 'Task deletion successfully.'); 
+}else{
+
+   return redirect('/tasks')
+   ->with('success','Task deleted successfully');
+}
+
+}catch (Exception $e) {
+
+    if(\Request::is('api*')){
+      return $this->sendError('Task delete Unsuccessful.', $e->getMessage());  }else{
+
+        return redirect('/tasks')
+        ->with('Error','Task deleted UnSuccessfull');
     }
-
-
-    return redirect()->intended('/tasks')
-    ->with('success','Task deleted successfully');;
+}
 }
 
 // private function validateInput($request) {

@@ -3,73 +3,89 @@
 namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller as Controller;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\User;
+use Validator;
 
 class AuthController extends Controller
 {
-     public function login(Request $request)
+
+     public $sucessStatus = 200;
+    
+     public function login()
+
     {
-        $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-            'remember_me' => 'boolean'
-        ]);
-
-        $credentials = request(['email', 'password']);
-
-        if(!Auth::attempt($credentials))
-            return response()->json([
-                'message' => 'Unauthorized'
-            ], 401);
-
-        $user = $request->user();
-
-        $tokenResult = $user->createToken('Personal Access Token');
-        $token = $tokenResult->token;
-        if ($request->remember_me)
-            $token->expires_at = Carbon::now()->addWeeks(1);
-
-        $token->save();
+       
+     if(Auth::attempt(['email' => request('email'), 'password' => request('password')])) {
+            $user = Auth::user();
+            $success['token'] = $user->createToken('MyApp')->accessToken;
+            return response()->json(['success' => $success], $this->sucessStatus);
+        }
+        else {
+            return response()->json(['error' => 'Unauthorised'], 401);
+        }}
 
 
-        return response()->json([
-            'access_token' => $tokenResult->accessToken,
-            'token_type' => 'Bearer',
-            'expires_at' => Carbon::parse(
-                $tokenResult->token->expires_at
-            )->toDateTimeString()
-        ]);
-    }
-
-     public function logout(Request $request)
-    {
         
-        $value = $request->bearerToken();
-        $id= (new Parser())->parse($value)->getHeader('jti');
+    public function register(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'fname' => 'required',
+            'lname' => 'required',
+            'email' => 'required|email',
+            'password' => 'required',
+            'c_password' => 'required|same:password',
+        ]);
 
-        $token=  DB::table('oauth_access_tokens')
-            ->where('id', '=', $id)
-            ->update(['revoked' => true]);
+
+        if($validator->fails()){
+            return $this->sendError('Validation or Format Error.', $validator->errors());       
+        }
+
+        $input = $request->all();
+
+        $input['password'] = bcrypt($input['password']);
+        $user = User::create($input);
 
 
-        $this->guard()->logout();
-
-        $request->session()->flush();
-
-        $request->session()->regenerate();
-
-        $json = [
-            'success' => true,
-            'code' => 200,
-            'message' => 'You are Logged out.',
-        ];
-        return response()->json($json, '200');
-
-        // return response()->json([
-        //     'message' => 'Successfully logged out'
-        // ]);
+        $success['token'] =  $user->createToken('MyApp')->accessToken;
+        // $success['token'] =  $user->api_token;
+        $success['fname'] =  $user->fname;
+        $success['lname'] =  $user->lname;
+ 
+        return $this->sendResponse($success, 'User register successfully.');        
+        
+         //return BaseController::sendResponse($success, 'User register successfully.');
     }
+
+
+    //  public function logout(Request $request)
+    // {
+        
+    //     $value = $request->bearerToken();
+    //     $id= (new Parser())->parse($value)->getHeader('jti');
+
+    //     $token=  DB::table('oauth_access_tokens')
+    //         ->where('id', '=', $id)
+    //         ->update(['revoked' => true]);
+
+    //     $this->guard()->logout();
+
+    //     $request->session()->flush();
+
+    //     $request->session()->regenerate();
+
+    //     $json = [
+    //         'success' => true,
+    //         'code' => 200,
+    //         'message' => 'You are Logged out.',
+    //     ];
+    //     return response()->json($json, '200');
+
+    //     // return response()->json([
+    //     //     'message' => 'Successfully logged out'
+    //     // ]);
+    // }
 }

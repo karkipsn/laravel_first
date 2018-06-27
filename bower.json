@@ -1,0 +1,24 @@
+{
+  "name": "user-management_laravel",
+  "description": "",
+  "main": "",
+  "authors": [
+    "karkipsn <20148471+karkipsn@users.noreply.github.com>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/karkipsn/laravel_first",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^4.1.1"
+  },
+  "devDependencies": {
+    "jquery": "^3.3.1"
+  }
+}

@@ -18,8 +18,11 @@ class AuthController extends Controller
 
     {
        
-     if(Auth::attempt(['email' => request('email'), 'password' => request('password')])) {
+     if(Auth::attempt(['email' => request('email'), 
+        'password' => request('password')])) {
+
             $user = Auth::user();
+        
             $success['token'] = $user->createToken('MyApp')->accessToken;
             return response()->json(['success' => $success], $this->sucessStatus);
         }
@@ -59,6 +62,10 @@ class AuthController extends Controller
         
          //return BaseController::sendResponse($success, 'User register successfully.');
     }
+     public function getDetails() {
+         $user = Auth::user();
+         return response()->json(['success' => $user], $this->sucessStatus);
+     }
 
 
     //  public function logout(Request $request)

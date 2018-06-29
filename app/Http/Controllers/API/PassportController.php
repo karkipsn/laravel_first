@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller as Controller;
 use App\Http\Controllers\BaseController as BaseController;
 use App\User;
@@ -118,4 +119,8 @@ class PassportController extends BaseController
 
        return $this->sendResponse($user->toArray(), 'User deleted successfully.');
    }
+    public function getDetails() {
+         $user = Auth::user();
+         return response()->json(['success' => $user], 200);
+     }
 }

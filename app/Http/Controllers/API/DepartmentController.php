@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller as Controller;
 use App\Http\Controllers\BaseController as BaseController;
 use App\Http\Controllers\DepartmentController as DController;
@@ -16,6 +17,7 @@ class DepartmentController extends DController
   public function __construct(DController $dep)
   {
      $this->dep = $dep;
+     // $this->middleware('auth:api');
   }
 
   

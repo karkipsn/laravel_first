@@ -1,91 +1,68 @@
- var gulp = require('gulp');
+// var elixir = require('laravel-elixir');
 
-gulp.task('cssg', function() {
-   return gulp.src('app/css/style.css')
-              .pipe(gulp.dest('public/css'));
-});
-
-var cleanCSS = require('gulp-clean-css');
-
-gulp.task('css1', function() {
-   return gulp.src('app/css/style.css')
-               .pipe(cleanCSS({compatibility: 'ie8'}))
-               .pipe(gulp.dest('public/css'));
-});
-
-var sass = require('gulp-sass'),
-    less = require('gulp-less'),
-    elixir = require('laravel-elixir');
-
-gulp.task('sass', function() {
-   return gulp.src('app/css/style.scss')
-               .pipe(sass())
-               .pipe(cleanCSS({compatibility: 'ie8'}))
-               .pipe(gulp.dest('public/css'));
-});
-
-//var gulp = require('gulp');
-    // sass = require('gulp-ruby-sass'),           // compiles sass to CSS
-   // var minify = require('gulp-minify-css'),        // minifies CSS
-    concat = require('gulp-concat'),            // concat files
-    uglify = require('gulp-uglify');           // uglifies JS
-    // rename = require('gulp-rename'),            // rename files
-    // notify = require('gulp-notify'),            // notify using MAC
-   var bower = require('gulp-bower');             // bower update tasks
-    // phpunit = require('gulp-phpunit');          // PHP unit test
-    // livereload = require('gulp-livereload');    // reload browser
-    // sourcemaps = require('gulp-sourcemaps');    // debug tool by showing file reference
-
-// Include plugins
-var plugins = require("gulp-load-plugins")({
-	pattern: ['gulp-*', 'gulp.*', 'main-bower-files'],
-	replaceString: /\bgulp[\-.]/
-});
-
-//Define default destination folder
-//var src = 'src/';
-var dest = 'www/public/';
-
-// Paths variables
-
-// gulp.task('test', function(done) {
-
-// console.log(plugins);
-// done();
-
+//     elixir(function(mix) {
+//     mix.less('app.less');
 // });
 
+var gulp = require('gulp'),
+ uglify = require('gulp-uglify'),
+ gulpIf = require('gulp-if'),
+ imagemin = require('gulp-imagemin');
+const changed = require('gulp-changed');
+  var bower = require('gulp-bower'), 
+   minify = require('gulp-minify-css'),        // minifies CSS
+    concat = require('gulp-concat'),            // concat files
+    uglify = require('gulp-uglify'),
+     phpunit = require('gulp-phpunit');
 
-gulp.task('js', function() {
 
-	var jsFiles = ['src/js/*'];
+var browserSync = require('browser-sync').create('s1');
+var browserSync1 = require('browser-sync').create('s2');
+var browserSync2 = require('browser-sync').create('s3');
 
-	gulp.src(plugins.mainBowerFiles().concat(jsFiles).on ('error',errorhandler))
-		.pipe(plugins.filter('**/*.js'))
-		.pipe(plugins.concat('main.js'))
-		.pipe(plugins.uglify())
-		.pipe(gulp.dest(dest + 'js'));
-
+// Static server
+gulp.task('browser-sync', function(done) {
+    browserSync.init({
+    proxy: "localhost:8000/api/users"
+    
+   }) 
+});
+gulp.task('browser-sync1', function(done) {
+    browserSync.init({
+    proxy: "localhost:8000/api/users"
+  
+   }) 
+});
+gulp.task('browser-sync2', function() {
+    browserSync.init({
+    proxy: "localhost:8000/api/users"
+   }) 
 });
 
-var paths = {
-    'resources': {
-        'sass'  : './public/sass/',
-        'scss'  : './public/scss/',
-        'js'    : './public/js/',
-        'vendor': './public/vendor/',
-        'fonts' : './public/fonts/',
-        'css'   : './public/css/',
-    },
-    'assets': {
-        'css'  : './public/assets/css/',
-        'js'   : './public/assets/js/',
-        'bower': './public/assets/bower_components/',
-    },
-    'app': {
-          'tests': './app/tests',
-    }
-};
+
+
+
+gulp.task('useref', function(){
+  return gulp.src('/resources/views/employees/*.php')
+    //.pipe(useref())
+    // Minifies only if it's a JavaScript file
+    .pipe(gulpIf('*.js', uglify()))
+    .pipe(gulp.dest('public/js'))
+
+    gulp.watch('/resources/views/employees/*.php', function() {
+      // run styles upon changes
+      gulp.run('useref');
+   });
+});
+
+gulp.task('imagemin', function() {
+   var img_src = 'storage/app/avatars/*', img_dest = 'public/images';
+   
+   gulp.src(img_src)
+   .pipe(changed(img_dest))
+   .pipe(imagemin())
+   .pipe(gulp.dest(img_dest));
+});
 
 gulp.task('bower', function() {
   return bower();
@@ -111,6 +88,36 @@ gulp.task('lessCss', function() {
                .pipe(gulp.dest('public/css'));
 });
 
+gulp.task('css1', function() {
+   return gulp.src('app/css/style.css')
+               .pipe(cleanCSS({compatibility: 'ie8'}))
+               .pipe(gulp.dest('public/css'));
+});
+
+var sass = require('gulp-sass'),
+    less = require('gulp-less'),
+    elixir = require('laravel-elixir');
+
+gulp.task('sass', function() {
+   return gulp.src('app/css/style.scss')
+               .pipe(sass())
+               .pipe(cleanCSS({compatibility: 'ie8'}))
+               .pipe(gulp.dest('public/css'));
+});
+
+gulp.task('js', function() {
+
+	var jsFiles = ['src/js/*'];
+
+	gulp.src(plugins.mainBowerFiles().concat(jsFiles).on ('error',errorhandler))
+		.pipe(plugins.filter('**/*.js'))
+		.pipe(plugins.concat('main.js'))
+		.pipe(plugins.uglify())
+		.pipe(gulp.dest(dest + 'js'));
+
+});
+
+
 gulp.task('watch:less', function() {
    gulp.watch('app/less/*.less', ['lessCss']);
 });
@@ -121,6 +128,12 @@ gulp.task('jsMinify2', function() {
                .pipe(gulp.dest('public/js'));
 });
 
-// elixir(function(mix) {
-//     'bootstrap-datepicker.js'
+ 
+gulp.task('phpunit', function() {
+  gulp.src('phpunit.xml')
+   // .pipe(phpunit('.\\path\\to\\phpunit'));
+    .pipe(phpunit('.\\vendor\\bin\\phpunit'));
+});
+// gulp.task('default', ['imagemin', 'useref','browser-sync'], function() {
+
 // });

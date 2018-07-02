@@ -6,8 +6,8 @@
 	
     <link rel="stylesheet" ref="/bower/bower_components/bootstrap/dist/css/bootstrap.min.css">
 
-  <script src="/bower/bower_components/jquery/dist/jquery.min.js"></script>
-  <script src="/bower/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+   <script src="/bower/bower_components/jquery/dist/jquery.min.js"></script>
+   <script src="/bower/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="/bower/bower_components/jquery/dist/jquery.min.js"></script>
     <script src="/bower/bower_components/bootstrap-datepicker/js/jquery.min.js"></script>
     <script src="/bower/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css"></script>

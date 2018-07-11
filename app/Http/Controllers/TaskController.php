@@ -8,6 +8,7 @@ use App\Employee;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Request as Req;
 use Validator;
 use App\Http\Controllers\Controller as Controller;
 use App\Http\Controllers\BaseController as BaseController;
@@ -26,35 +27,36 @@ class TaskController extends BaseController
      */
     public function index()
     {
-        try{
+      try{
 
-         $tasks = DB::table('tasks')
-        ->leftJoin('employees', 'tasks.employee_id', '=', 'employees.id')
-        ->select ('tasks.*','employees.name as employee_name','employees.id as employee_id')
-        ->paginate(5);
+       $tasks = DB::table('tasks')
+       ->leftJoin('employees', 'tasks.employee_id', '=', 'employees.emp_id')
+       ->select ('tasks.*','employees.name as employee_name','employees.emp_id as employee_id');
 
 
-         if (\Request::is('api*')) {
+       if (\Request::is('api*')) {
+        $tasks1= $task->get();
 
-             return BaseController::sendResponse($tasks->toArray(), 'Tasks retrieved successfully.');
+         return BaseController::sendResponse($tasks1->toArray(), 'Tasks retrieved successfully.');
 
-         }else{
-
-                    return view('tasks/index', ['tasks' => $tasks]);      
-        }
+       }else{
+         $tasks2= $tasks->paginate(5);
+        
+        return view('tasks/index', ['tasks' => $tasks2]);      
+      }
 
     }catch (Exception $e){
 
-        if(\Request::is('api*')){
+      if(\Request::is('api*')){
 
-           return $this->sendError('Tasks retrival Unsuccessful.', $e->getMessage());  }
-           else{
-               return redirect('/tasks')
-               ->with('Error','Tasks retrival UnSuccessfull.');
-           }
+       return $this->sendError('Tasks retrival Unsuccessful.', $e->getMessage());  }
+       else{
+         return redirect('/tasks')
+         ->with('Error','Tasks retrival UnSuccessfull.');
+       }
 
-       } 
-    }
+     } 
+   }
 
     /**
      * Show the form for creating a new resource.
@@ -63,10 +65,10 @@ class TaskController extends BaseController
      */
     public function create()
     {
-        $employees = Employee::all();
+      $employees = Employee::all();
 
-        return view('tasks/create', [
-            'employees' => $employees]);
+      return view('tasks/create', [
+        'employees' => $employees]);
     }
     
     /**
@@ -79,56 +81,85 @@ class TaskController extends BaseController
     {
       try{
 
-     $input = $request->all();
+       $input = $request->all();
 
-     $validator = Validator::make($input, [
-       'title' => 'required|string|max:60',
-       'description' => 'required|string|max:120',
-       'deadline' => 'required|date',
-       'attachment' => 'required|file|image|mimes:jpeg,png,gif,webp|max:2048',
-       'employee_id' => 'required|exists:employees,id'
+       $validator = Validator::make($input, [
+         'title' => 'required|string|max:60',
+         'description' => 'required|string|max:120',
+         'deadline' => 'required|date',
+         'attachment' => 'required|file|image|mimes:jpeg,png,gif,webp|max:2048',
+         'employee_id' => 'required|exists:employees,emp_id'
 
-   ]);
-     
-     if($validator->fails()){
+       ]);
 
-            if(\Request::is('api*')){
+       if($validator->fails()){
 
-               return BaseController::sendError('Validation or Data Format Error.', $validator->errors());
-           } else{
+        if(\Request::is('api*')){
 
-             return redirect('/tasks')->withErrors($validator)
-             ->withInput();
-         }  
+         return BaseController::sendError('Validation or Data Format Error.', $validator->errors());
+       } else{
+
+         return redirect('/tasks')->withErrors($validator)
+         ->withInput();
+       }  
      }
-         
-         $path = $request->file('attachment')->store('avatars');
-           $input['attachment'] = $path;
+      
+      //avatars bhanne path ma rakhna lai yo garni
+      // $path = $request->file('attachment')->store('images');
+      //   $input['attachment'] = $path;
 
-          $task = Task::create($input);
- 
-         if(\Request::is('api*')){
-            
-             return BaseController::sendResponse($task->toArray(), 'Task created successfully.');
+     $attachment = Req::file('attachment');
 
-        }else{
+            $random = str_random(10);
+            $destinationPath    = public_path().'/images/';
+            $filename            = $random.'_'.$attachment->getClientOriginalName();
 
-              return redirect('/tasks')
-               ->with('success','Task created successfully.');
-          } 
-      }
-      catch (Exception $e) {
+     list($width, $height) = getimagesize($attachment);
 
-          if(\Request::is('api*')){
-                    return $this->sendError('Task creation Unsuccessful.', $e->getMessage());  }
+            $thumbnail_width = 350;
+            $ratio = $width/$thumbnail_width;
+            $thumbnail_height = $height/$ratio;
 
-               else{
+            // \Image::make($attachment->getRealPath())->resize($thumbnail_width, $thumbnail_height)->save(public_path().'/images/thumbnails/'.$filename);
 
-                   return redirect('/tasks')
-                      ->with('Error','Task creation UnSuccessfull.');
-                        }
-               }
-        }
+            \Image::make($attachment->getRealPath())->resize($thumbnail_width, $thumbnail_height)->save(public_path().'/images/thumbnails/'.$filename);
+
+            \Image::make($attachment->getRealPath())->resize(2*$thumbnail_width, 2*$thumbnail_height)->save(public_path().'/images/'.$filename);
+
+         //ani file name lai db ma save garne
+            $input['attachment']=$filename;
+        
+
+        // $image = $request->attachment;  // your base64 encoded
+        // $image = str_replace('data:image/png;base64,', '', $image);
+        // $image = str_replace(' ', '+', $image);
+        // $imageName = str_random(10).'.'.'png';
+        // \File::put(storage_path(). '/' . $imageName, base64_decode($image));
+
+        $task = Task::create($input);
+
+        if(\Request::is('api*')){
+
+         return BaseController::sendResponse($task->toArray(), 'Task created successfully.');
+
+       }else{
+
+        return redirect('/tasks')
+        ->with('success','Task created successfully.');
+      } 
+    }
+    catch (Exception $e) {
+
+      if(\Request::is('api*')){
+        return $this->sendError('Task creation Unsuccessful.', $e->getMessage());  }
+
+        else{
+
+         return redirect('/tasks')
+         ->with('Error','Task creation UnSuccessfull.');
+       }
+     }
+   }
 
 
 
@@ -138,53 +169,53 @@ class TaskController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($emp_id)
     {
-        $task = Task::find($id);
+      $task = Task::find($emp_id);
 
-        if (is_null($task)) {
+      if (is_null($task)) {
 
-           if(\Request::is('api*')){
+       if(\Request::is('api*')){
 
-             return $this->sendDelete('No task with such id exists .');
-         }
-         else{
+         return $this->sendDelete('No task with such id exists .');
+       }
+       else{
 
-           return redirect('/employees')
-           ->with('Error','No such task with Id');
+         return redirect('/employees')
+         ->with('Error','No such task with Id');
        }    
-   }
-   else{
+     }
+     else{
 
-    try {
+      try {
 
-         $task = DB::table('tasks')
-       ->leftJoin('employees', 'tasks.employee_id', '=', 'employees.id')
-       ->select ('tasks.*','employees.name as employee_name','employees.id as employee_id')
-       ->where('employees.id', '=', $id)
-        ->get();
+       $task = DB::table('tasks')
+       ->leftJoin('employees', 'tasks.employee_id', '=', 'employees.emp_id')
+       ->select ('tasks.*','employees.name as employee_name','employees.emp_id as employee_id')
+       ->where('employees.emp_id', '=', $emp_id)
+       ->get();
 
-        if(\Request::is('api*')){
+       if(\Request::is('api*')){
 
          return $this->sendResponse($task->toArray(), 'Task retrieved successfully.');
-     }else{
+       }else{
 
-       return view('tasks.show',compact('task'));
-   }    
-}        
-catch (Exception $e) {
+         return view('tasks.show',compact('task'));
+       }    
+     }        
+     catch (Exception $e) {
 
-    if(\Request::is('api*')){
+      if(\Request::is('api*')){
 
-      return $this->sendError('Task retrival Unsuccessful.', $e->getMessage());  }
-      else{
-       return redirect('/tasks')
-       ->with('Error','Task retrival UnSuccessfull.');
+        return $this->sendError('Task retrival Unsuccessful.', $e->getMessage());  }
+        else{
+         return redirect('/tasks')
+         ->with('Error','Task retrival UnSuccessfull.');
+       }
+     }
    }
-}
-}
 
-    }
+ }
 
     /**
      * Show the form for editing the specified resource.
@@ -192,15 +223,15 @@ catch (Exception $e) {
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($emp_id)
     {
 
-     $task = Employee::find($id);
+     $task = Employee::find($emp_id);
      $employees = Employee::all();
 
      return view('tasks/edit', ['task' => $task, 
-        'employees' => $employees]);
- }
+      'employees' => $employees]);
+   }
 
     /**
      * Update the specified resource in storage.
@@ -213,76 +244,76 @@ catch (Exception $e) {
     public function update(Request $request, Task $task)
     {
 
-        $id = Task::findOrFail($task);
+      $id = Task::findOrFail($task);
 
-        if (is_null($id)) {
+      if (is_null($id)) {
 
-           if(\Request::is('api*')){
+       if(\Request::is('api*')){
 
-             return $this->sendDelete('No task with such id exists .');
-         }
-         else{
+         return $this->sendDelete('No task with such id exists .');
+       }
+       else{
 
-           return redirect('/tasks')
-           ->with('Error','No such task with Id');
+         return redirect('/tasks')
+         ->with('Error','No such task with Id');
        }    
-   }
-   else{
+     }
+     else{
 
        try{
         $input = $request->all();
 
         $validator = Validator::make($input, [
-            'title' => 'required|string|max:60',
-            'description' => 'required|string|max:120',
-            'deadline' => 'required|date',
-            'attachment' => 'required|mimes:jpeg,PNG,gif,webp|max:2048',
-            'employee_id' => 'required|exists:employees,id'
+          'title' => 'required|string|max:60',
+          'description' => 'required|string|max:120',
+          'deadline' => 'required|date',
+          'attachment' => 'required|mimes:jpeg,PNG,gif,webp|max:2048',
+          'employee_id' => 'required|exists:employees,emp_id'
         ]);
 
-         if($validator->fails()){
+        if($validator->fails()){
 
-            if(\Request::is('api*')){
+          if(\Request::is('api*')){
 
-               return BaseController::sendError('Validation or Data Format Error.', $validator->errors());
-           } else{
+           return BaseController::sendError('Validation or Data Format Error.', $validator->errors());
+         } else{
 
-             return redirect('/tasks')->withErrors($validator)
-             ->withInput();
+           return redirect('/tasks')->withErrors($validator)
+           ->withInput();
          }  
-     }
+       }
 
-    $task->title = $input['title'];
-    $task->description = $input['description'];
-    $task->deadline = $input['deadline'];
-    $task->employee_id = $input['employee_id'];
+       $task->title = $input['title'];
+       $task->description = $input['description'];
+       $task->deadline = $input['deadline'];
+       $task->employee_id = $input['employee_id'];
 
-    if ($request->file('attachment')) {
+       if ($request->file('attachment')) {
 
-      $path = $request->file('attachment')->store('avatars');
-      $input['attachment'] = $path;
-      $task->attachment = $input['attachment']; }
+        $path = $request->file('attachment')->store('avatars');
+        $input['attachment'] = $path;
+        $task->attachment = $input['attachment']; }
 
-    $task->save();
+        $task->save();
 
-  if(\Request::is('api*')){
-     return $this->sendResponse($task->toArray(), 'Task updated successfully.');
+        if(\Request::is('api*')){
+         return $this->sendResponse($task->toArray(), 'Task updated successfully.');
 
- }else{
-     return redirect('/tasks')
-     ->with('success',' Task updated successfully.');
- }}
- catch (Exception $e) {
-    
-   if(\Request::is('api*')){
-      return $this->sendError('Task updation Unsuccessful.', $e->getMessage());  
-  }else{
-        return redirect('/tasks')
-       ->with('success','Task update UnSuccessfull.');
-  }
-}
+       }else{
+         return redirect('/tasks')
+         ->with('success',' Task updated successfully.');
+       }}
+       catch (Exception $e) {
 
-} }
+         if(\Request::is('api*')){
+          return $this->sendError('Task updation Unsuccessful.', $e->getMessage());  
+        }else{
+          return redirect('/tasks')
+          ->with('success','Task update UnSuccessfull.');
+        }
+      }
+
+    } }
 
     /**
      * Remove the specified resource from storage.
@@ -297,38 +328,38 @@ catch (Exception $e) {
 
       if(is_null($task)){
 
-         if(\Request::is('api*')){
+       if(\Request::is('api*')){
 
-          return $this->sendDelete('No task with such id exists .');
+        return $this->sendDelete('No task with such id exists .');
       }else{
 
-         return redirect('/tasks')
-         ->with('Error','No such tasks asssociated with this Id');
+       return redirect('/tasks')
+       ->with('Error','No such tasks asssociated with this Id');
      }    
- }
-     try{
+   }
+   try{
 
- $task->delete();
+     $task->delete();
 
- if(\Request::is('api*')){
+     if(\Request::is('api*')){
 
-   return $this->sendResponse($task, 'Task deletion successfully.'); 
-}else{
+       return $this->sendResponse($task, 'Task deletion successfully.'); 
+     }else{
 
-   return redirect('/tasks')
-   ->with('success','Task deleted successfully');
-}
+       return redirect('/tasks')
+       ->with('success','Task deleted successfully');
+     }
 
-}catch (Exception $e) {
+   }catch (Exception $e) {
 
     if(\Request::is('api*')){
       return $this->sendError('Task delete Unsuccessful.', $e->getMessage());  }else{
 
         return redirect('/tasks')
         ->with('Error','Task deleted UnSuccessfull');
+      }
     }
-}
-}
+  }
 
 // private function validateInput($request) {
 

@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Controller as Controller;
+use App\Http\Controllers\BaseController as BaseController;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\User;
 use Validator;
 
-class AuthController extends Controller
+class AuthController extends BaseController
 {
 
      public $sucessStatus = 200;
@@ -22,11 +23,13 @@ class AuthController extends Controller
         'password' => request('password')])) {
 
             $user = Auth::user();
-        
+       
             $success['token'] = $user->createToken('MyApp')->accessToken;
             return response()->json(['success' => $success], $this->sucessStatus);
+            //return response()->json(['success' => $email, 'password'=>$password]);
         }
         else {
+            //return response()->json(['success' => $email, 'password'=>$password]);
             return response()->json(['error' => 'Unauthorised'], 401);
         }}
 
@@ -51,12 +54,14 @@ class AuthController extends Controller
 
         $input['password'] = bcrypt($input['password']);
         $user = User::create($input);
+        
+        $api_token =$user->createToken('MyApp')->accessToken;
+        // // $success['token'] =  $user->api_token;
 
-
-        $success['token'] =  $user->createToken('MyApp')->accessToken;
-        // $success['token'] =  $user->api_token;
-        $success['fname'] =  $user->fname;
-        $success['lname'] =  $user->lname;
+         $success['token'] =  $api_token;
+        // // $success['token'] =  $user->api_token;
+         $success['fname'] =  $user->fname;
+         $success['lname'] =  $user->lname;
  
         return $this->sendResponse($success, 'User register successfully.');        
         

@@ -28,7 +28,7 @@
                                 <select class="form-control" name="employee_id">
                                     
                                     @foreach ($employees as $employee)
-                                    <option value="{{$employee->id}}">{{$employee->id}}</option>
+                                    <option value="{{$employee->emp_id}}">{{$employee->emp_id}}</option>
                                     @endforeach
                                 </select>
                                 @if ($errors->has('employee_id'))

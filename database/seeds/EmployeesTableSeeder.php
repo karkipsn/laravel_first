@@ -18,6 +18,7 @@ class EmployeesTableSeeder extends Seeder
            
     		DB::table('employees')->insert([
     			'name' => $faker->name,
+                'emp_id' =>$faker-> numberBetween($min = 4000, $max =4005 ) ,
     			'add' => $faker->address,
     			'date_hired' =>  $faker->date($format = 'Y-m-d', $max = 'now'),
     			'birthdate' => $faker-> date($format = 'Y-m-d', $max = 'now'),

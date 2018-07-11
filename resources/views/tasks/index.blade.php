@@ -50,7 +50,8 @@
                 <td class="hidden-xs">{{ $task->description }}</td>
 
                <!-- <tr role="row" class="odd"> -->
-                  <td><img src="../{{$task->attachment }}" width="50px" height="50px"/></td>
+                  <td><img src="images/{{$task->attachment }}" width="50px" height="50px"/></td>
+
                 <td class="hidden-xs">{{ $task->deadline }}</td>
                 
                 <td>

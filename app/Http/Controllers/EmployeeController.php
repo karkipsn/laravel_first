@@ -30,7 +30,7 @@ class EmployeeController extends BaseController
 
          $employees = DB::table('employees')
          ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
-         ->select('employees.*', 'departments.name as department_name', 'departments.id as department_id')->paginate(5);
+         ->select('employees.*', 'departments.name as department_name', 'departments.id as department_id')->get();
 
 
          if (\Request::is('api*')) {

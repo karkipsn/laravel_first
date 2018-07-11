@@ -7,16 +7,18 @@ use App\Http\Controllers\Controller as Controller;
 
 class BaseController extends Controller
 {
-public function sendDelete($message){
+	
+  
+  public function sendDelete($message){
 
 		$response = [
-			'error' => true,
+			'success' => false,
+			'data'    => null,
 			'message' => $message,
 		];
 		
 
-		return response()->json($response);
-
+		return response()->json($response,200);
 }
 
 	public function sendResponse($result, $message){
@@ -35,7 +37,7 @@ public function sendDelete($message){
 
 	public function sendError($error, $errorMessages = [], $code = 404){
 		$response = [
-			'error' => true,
+			'success' => false,
 			'message' => $error,
 		];
 		if(!empty($errorMessages)){

@@ -1,17 +1,13 @@
 <?php
-
 namespace App\Http\Controllers\API;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller as Controller;
 use App\Http\Controllers\BaseController as BaseController;
 use App\User;
 use Validator;
-
 class PassportController extends BaseController
 {
-
         public function __construct(){
         $this->content = array();
     }
@@ -23,11 +19,8 @@ class PassportController extends BaseController
     public function index()
     {
         $users = User::all();
-
         return $this->sendResponse(json_decode($users), 'Departments retrieved successfully.');
     }
-
-
     /**
      * Store a newly created resource in storage.
      *
@@ -43,24 +36,17 @@ class PassportController extends BaseController
         'password' => 'required',
         'c_password' => 'required|same:password',
     ]);
-
-
       if($validator->fails()){
         return $this->sendError('Validation Error or Format Error.', $validator->errors());       
     }
-
     $input = $request->all();
-
     $input['password'] = bcrypt($input['password']);
     $user = User::create($input);
     $success['fname'] =  $user->fname;
     $success['lname'] =  $user->lname;
     $success['email'] =  $user->email;
-
     return $this->sendResponse($success, 'User register successfully.');     
 }
-
-
       public function login(){
         if(Auth::attempt(['email' => request('email'), 'password' => request('password')])){
         $user = Auth::user();
@@ -83,7 +69,6 @@ class PassportController extends BaseController
     //         return response()->json(['error' => 'Unauthorised'], 401);
     //     }
     // }
-
     /**
      * Show the form for editing the specified resource.
      *
@@ -94,7 +79,6 @@ class PassportController extends BaseController
     {
         //
     }
-
     /**
      * Update the specified resource in storage.
      *
@@ -106,7 +90,6 @@ class PassportController extends BaseController
     {
         //
     }
-
     /**
      * Remove the specified resource from storage.
      *
@@ -116,7 +99,6 @@ class PassportController extends BaseController
     public function destroy(User $user)
     {
        $user->delete();
-
        return $this->sendResponse($user->toArray(), 'User deleted successfully.');
    }
     public function getDetails() {

@@ -46,7 +46,9 @@ class EmployeeController extends BaseController
 
         if(\Request::is('api*')){
 
-           return $this->sendError('Employees retrival Unsuccessful.', $e->getMessage());  }
+           return $this->sendError('Employees retrival Unsuccessful.', $e->getMessage()); 
+            }
+            
            else{
                return redirect('/employees')
                ->with('Error','Employees retrival UnSuccessfull.');

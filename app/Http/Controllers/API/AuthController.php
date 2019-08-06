@@ -24,8 +24,18 @@ class AuthController extends BaseController
 
             $user = Auth::user();
        
-            $success['token'] = $user->createToken('MyApp')->accessToken;
-            return response()->json(['success' => $success], $this->sucessStatus);
+            $success['success'] =  true;
+            $success['status'] =  "0";
+            $success['id'] =  $user->id;
+            $success['fname'] =  $user->fname;
+            $success['lname'] =  $user->lname;
+            $success['email'] =  $user->email;
+            $success['created_at'] = $user->created_at->toDateTimeString();
+            $success['updated_at'] =  $user->updated_at->toDateTimeString();
+             $success['token'] = $user->createToken('MyApp')->accessToken;
+
+
+            return response()->json(['result' => $success], $this->sucessStatus);
             //return response()->json(['success' => $email, 'password'=>$password]);
         }
         else {
@@ -54,14 +64,23 @@ class AuthController extends BaseController
 
         $input['password'] = bcrypt($input['password']);
         $user = User::create($input);
-        
-        $api_token =$user->createToken('MyApp')->accessToken;
+
+        $success['fname'] =  $user->fname;
+         $success['lname'] =  $user->lname;
+         $success['email'] =  $user->email;
+        $success['created_at'] = $user->created_at->toDateTimeString();
+         $success['updated_at'] =  $user->updated_at->toDateTimeString();
+       
+        // dd($user);
+        // die;
+         $api_token =$user->createToken('MyApp')->accessToken;
+
         // // $success['token'] =  $user->api_token;
+
 
          $success['token'] =  $api_token;
         // // $success['token'] =  $user->api_token;
-         $success['fname'] =  $user->fname;
-         $success['lname'] =  $user->lname;
+         
  
         return $this->sendResponse($success, 'User register successfully.');        
         

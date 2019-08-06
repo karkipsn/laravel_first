@@ -68,5 +68,12 @@
   "bugs": {
     "url": "https://github.com/karkipsn/laravel_first/issues"
   },
+  "extra": {
+    "laravel": {
+        "dont-discover": [
+            "laravel/dusk"
+        ]
+    }
+},
   "homepage": "https://github.com/karkipsn/laravel_first#readme"
 }
